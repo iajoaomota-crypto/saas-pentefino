@@ -1,0 +1,5 @@
+{
+  "name": "PenteFino Dashboard",
+  "description": "Dashboard financeiro completo para barbearias com controle de entradas, saídas e conformidade LGPD.",
+  "requestFramePermissions": []
+}
