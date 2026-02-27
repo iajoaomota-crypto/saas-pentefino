@@ -3,7 +3,12 @@ import path from 'path';
 import bcrypt from 'bcryptjs';
 
 // Define the database path
-const dbPath = path.resolve(import.meta.dirname, 'database.sqlite');
+// On Vercel, the only writable directory is /tmp
+const isVercel = process.env.VERCEL === '1';
+const dbPath = isVercel
+  ? path.join('/tmp', 'database.sqlite')
+  : path.resolve(import.meta.dirname, 'database.sqlite');
+
 const db = new Database(dbPath, { verbose: console.log });
 
 // Initialize database tables

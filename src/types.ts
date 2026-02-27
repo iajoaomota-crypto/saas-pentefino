@@ -20,3 +20,15 @@ export interface Closing {
     created_at: string;
     updated_at: string;
 }
+export interface Account {
+    id: number | string;
+    name: string;
+    category: string;
+    amount: number;
+    dueDate: number | string;
+    status: 'pending' | 'paid';
+    type: 'fixa' | 'variavel';
+    variableType?: 'unica' | 'recorrente';
+    referenceMonth: string;
+    paidAt?: string;
+}

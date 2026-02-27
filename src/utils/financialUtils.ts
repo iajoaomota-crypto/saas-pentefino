@@ -34,7 +34,7 @@ export const formatCurrency = (value: number | string): string => {
 /**
  * Sums an array of amounts safely.
  */
-export const sumAmounts = (amounts: (number | string)[]): number => {
+export const sumAmounts = (amounts: any[]): number => {
     const totalCents = amounts.reduce((acc, curr) => acc + toCents(curr), 0);
     return fromCents(totalCents);
 };
