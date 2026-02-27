@@ -1,52 +1,57 @@
-import Database from 'better-sqlite3';
-import path from 'path';
+import pg from 'pg';
 import bcrypt from 'bcryptjs';
 
-// Define the database path
-// On Vercel, the only writable directory is /tmp
-const isVercel = process.env.VERCEL === '1';
-const dbPath = isVercel
-  ? path.join('/tmp', 'database.sqlite')
-  : path.resolve(import.meta.dirname, 'database.sqlite');
+const { Pool } = pg;
 
-const db = new Database(dbPath, { verbose: console.log });
+// Connection string from environment variable or default
+const connectionString = process.env.DATABASE_URL || 'postgres://postgres:87e821b1d9d4b752471f@saas_backend_postgres:5432/saas_backend?sslmode=disable';
+
+const pool = new Pool({
+  connectionString,
+  ssl: connectionString.includes('sslmode=disable') ? false : { rejectUnauthorized: false }
+});
 
 // Initialize database tables
-export function initDB() {
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      username TEXT UNIQUE NOT NULL,
-      name TEXT NOT NULL DEFAULT '',
-      email TEXT UNIQUE NOT NULL DEFAULT '',
-      password TEXT NOT NULL,
-      role TEXT DEFAULT 'user',
-      active INTEGER DEFAULT 1,
-      expiration_date DATETIME DEFAULT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
-  `);
-
-  // Try to add new columns if the table already existed before this update
+export async function initDB() {
   try {
-    db.exec(`ALTER TABLE users ADD COLUMN name TEXT NOT NULL DEFAULT '';`);
-    db.exec(`ALTER TABLE users ADD COLUMN email TEXT NOT NULL DEFAULT '';`);
-    // Add UNIQUE constraint to email if possible (SQLite ALTER TABLE has limitations)
-    db.exec(`ALTER TABLE users ADD COLUMN expiration_date DATETIME DEFAULT NULL;`);
-  } catch (e) {
-    // Columns likely already exist
-  }
+    const client = await pool.connect();
+    console.log('Connected to PostgreSQL successfully.');
 
-  console.log('Database initialized successfully.');
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        username TEXT UNIQUE NOT NULL,
+        name TEXT NOT NULL DEFAULT '',
+        email TEXT UNIQUE NOT NULL DEFAULT '',
+        password TEXT NOT NULL,
+        role TEXT DEFAULT 'user',
+        active INTEGER DEFAULT 1,
+        expiration_date TIMESTAMP DEFAULT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
 
-  // Check if master user exists
-  const master = db.prepare('SELECT * FROM users WHERE username = ?').get('master');
-  if (!master) {
-    const hashedPassword = bcrypt.hashSync('master', 10);
-    db.prepare('INSERT INTO users (username, name, email, password, role) VALUES (?, ?, ?, ?, ?)')
-      .run('master', 'Admin Master', 'master@admin.com', hashedPassword, 'admin');
-    console.log('Master user created.');
+    // Verify if columns exist (for migration if table was created differently before)
+    // Note: Postgres is more strict, but for a new VPS deploy this will likely be fresh.
+
+    console.log('Database tables verified/created.');
+
+    // Check if master user exists
+    const masterCheck = await client.query('SELECT * FROM users WHERE username = $1', ['master']);
+    if (masterCheck.rowCount === 0) {
+      const hashedPassword = bcrypt.hashSync('master', 10);
+      await client.query(
+        'INSERT INTO users (username, name, email, password, role) VALUES ($1, $2, $3, $4, $5)',
+        ['master', 'Admin Master', 'master@admin.com', hashedPassword, 'admin']
+      );
+      console.log('Master user created.');
+    }
+
+    client.release();
+  } catch (err) {
+    console.error('Error initializing PostgreSQL:', err);
+    // Don't exit process, maybe it retry later
   }
 }
 
-export default db;
+export default pool;

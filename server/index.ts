@@ -33,37 +33,38 @@ const authenticateToken = (req: any, res: any, next: any) => {
 };
 
 // --- AUTH ROUTES ---
-app.post('/api/auth/register', (req, res) => {
+app.post('/api/auth/register', async (req, res) => {
     const { username, password, name, email } = req.body;
     if (!username || !password || !name || !email) return res.status(400).json({ error: 'Name, Email, Username and password are required' });
 
     try {
         const hashedPassword = bcrypt.hashSync(password, 10);
-        const checkQuery = db.prepare('SELECT COUNT(*) as count FROM users');
-        const { count } = checkQuery.get() as { count: number };
+        const checkQuery = await db.query('SELECT COUNT(*) as count FROM users');
+        const count = parseInt(checkQuery.rows[0].count);
 
         const role = count === 0 ? 'admin' : 'user';
 
-        const insert = db.prepare('INSERT INTO users (username, password, name, email, role) VALUES (?, ?, ?, ?, ?)');
-        insert.run(username, hashedPassword, name, email, role);
+        await db.query('INSERT INTO users (username, password, name, email, role) VALUES ($1, $2, $3, $4, $5)',
+            [username, hashedPassword, name, email, role]);
 
         res.status(201).json({ message: 'User created successfully', role });
     } catch (error: any) {
-        if (error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+        if (error.code === '23505') { // Postgres UNIQUE_VIOLATION
             res.status(400).json({ error: 'Username or Email already exists' });
         } else {
+            console.error('Register error:', error);
             res.status(500).json({ error: 'Server error' });
         }
     }
 });
 
-app.post('/api/auth/login', (req, res) => {
+app.post('/api/auth/login', async (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) return res.status(400).json({ error: 'Username and password required' });
 
     try {
-        const query = db.prepare('SELECT * FROM users WHERE username = ?');
-        const user = query.get(username) as any;
+        const result = await db.query('SELECT * FROM users WHERE username = $1', [username]);
+        const user = result.rows[0];
 
         if (!user || user.active === 0) {
             return res.status(401).json({ error: 'Invalid credentials or inactive user' });
@@ -83,25 +84,26 @@ app.post('/api/auth/login', (req, res) => {
 
         res.json({ token, user: { id: user.id, username: user.username, role: user.role, name: user.name, email: user.email, expiration_date: user.expiration_date } });
     } catch (error) {
+        console.error('Login error:', error);
         res.status(500).json({ error: 'Server error' });
     }
 });
 
 // --- ADMIN ROUTES ---
-app.get('/api/admin/users', authenticateToken, (req: any, res: any) => {
+app.get('/api/admin/users', authenticateToken, async (req: any, res: any) => {
     if (req.user.role !== 'admin') {
         return res.status(403).json({ error: 'Forbidden. Admins only.' });
     }
 
     try {
-        const users = db.prepare('SELECT id, username, name, email, role, active, expiration_date, created_at FROM users').all();
-        res.json(users);
+        const result = await db.query('SELECT id, username, name, email, role, active, expiration_date, created_at FROM users ORDER BY created_at DESC');
+        res.json(result.rows);
     } catch (error) {
         res.status(500).json({ error: 'Server error' });
     }
 });
 
-app.post('/api/admin/update-expiration', authenticateToken, (req: any, res: any) => {
+app.post('/api/admin/update-expiration', authenticateToken, async (req: any, res: any) => {
     if (req.user.role !== 'admin') {
         return res.status(403).json({ error: 'Forbidden. Admins only.' });
     }
@@ -110,14 +112,14 @@ app.post('/api/admin/update-expiration', authenticateToken, (req: any, res: any)
     if (!id) return res.status(400).json({ error: 'User ID required' });
 
     try {
-        db.prepare('UPDATE users SET expiration_date = ? WHERE id = ?').run(expiration_date || null, id);
+        await db.query('UPDATE users SET expiration_date = $1 WHERE id = $2', [expiration_date || null, id]);
         res.json({ message: 'Expiration date updated' });
     } catch (error) {
         res.status(500).json({ error: 'Server error' });
     }
 });
 
-app.post('/api/admin/toggle-status', authenticateToken, (req: any, res: any) => {
+app.post('/api/admin/toggle-status', authenticateToken, async (req: any, res: any) => {
     if (req.user.role !== 'admin') {
         return res.status(403).json({ error: 'Forbidden. Admins only.' });
     }
@@ -126,11 +128,12 @@ app.post('/api/admin/toggle-status', authenticateToken, (req: any, res: any) => 
     if (!id) return res.status(400).json({ error: 'User ID required' });
 
     try {
-        const user = db.prepare('SELECT active FROM users WHERE id = ?').get(id) as any;
+        const result = await db.query('SELECT active FROM users WHERE id = $1', [id]);
+        const user = result.rows[0];
         if (!user) return res.status(404).json({ error: 'User not found' });
 
         const newStatus = user.active === 1 ? 0 : 1;
-        db.prepare('UPDATE users SET active = ? WHERE id = ?').run(newStatus, id);
+        await db.query('UPDATE users SET active = $1 WHERE id = $2', [newStatus, id]);
 
         res.json({ message: 'User status updated', active: newStatus });
     } catch (error) {
@@ -138,7 +141,7 @@ app.post('/api/admin/toggle-status', authenticateToken, (req: any, res: any) => 
     }
 });
 
-app.post('/api/admin/change-password', authenticateToken, (req: any, res: any) => {
+app.post('/api/admin/change-password', authenticateToken, async (req: any, res: any) => {
     if (req.user.role !== 'admin') {
         return res.status(403).json({ error: 'Forbidden. Admins only.' });
     }
@@ -148,9 +151,9 @@ app.post('/api/admin/change-password', authenticateToken, (req: any, res: any) =
 
     try {
         const hashedPassword = bcrypt.hashSync(newPassword, 10);
-        const result = db.prepare('UPDATE users SET password = ? WHERE id = ?').run(hashedPassword, id);
+        const result = await db.query('UPDATE users SET password = $1 WHERE id = $2', [hashedPassword, id]);
 
-        if (result.changes === 0) return res.status(404).json({ error: 'User not found' });
+        if (result.rowCount === 0) return res.status(404).json({ error: 'User not found' });
 
         res.json({ message: 'Password updated successfully' });
     } catch (error) {
@@ -158,7 +161,7 @@ app.post('/api/admin/change-password', authenticateToken, (req: any, res: any) =
     }
 });
 
-app.post('/api/admin/delete-user', authenticateToken, (req: any, res: any) => {
+app.post('/api/admin/delete-user', authenticateToken, async (req: any, res: any) => {
     if (req.user.role !== 'admin') {
         return res.status(403).json({ error: 'Forbidden. Admins only.' });
     }
@@ -168,21 +171,22 @@ app.post('/api/admin/delete-user', authenticateToken, (req: any, res: any) => {
 
     try {
         // Prevent deleting the master user
-        const user = db.prepare('SELECT username FROM users WHERE id = ?').get(id) as any;
+        const result = await db.query('SELECT username FROM users WHERE id = $1', [id]);
+        const user = result.rows[0];
         if (!user) return res.status(404).json({ error: 'User not found' });
 
         if (user.username === 'master') {
             return res.status(400).json({ error: 'Cannot delete the master user' });
         }
 
-        db.prepare('DELETE FROM users WHERE id = ?').run(id);
+        await db.query('DELETE FROM users WHERE id = $1', [id]);
         res.json({ message: 'User deleted successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Server error' });
     }
 });
 
-app.post('/api/admin/update-role', authenticateToken, (req: any, res: any) => {
+app.post('/api/admin/update-role', authenticateToken, async (req: any, res: any) => {
     if (req.user.role !== 'admin') {
         return res.status(403).json({ error: 'Forbidden. Admins only.' });
     }
@@ -192,22 +196,22 @@ app.post('/api/admin/update-role', authenticateToken, (req: any, res: any) => {
     if (role !== 'admin' && role !== 'user') return res.status(400).json({ error: 'Invalid role' });
 
     try {
-        // Prevent downgrading the master user
-        const user = db.prepare('SELECT username FROM users WHERE id = ?').get(id) as any;
+        const result = await db.query('SELECT username FROM users WHERE id = $1', [id]);
+        const user = result.rows[0];
         if (!user) return res.status(404).json({ error: 'User not found' });
 
         if (user.username === 'master' && role === 'user') {
             return res.status(400).json({ error: 'Cannot downgrade the master user' });
         }
 
-        db.prepare('UPDATE users SET role = ? WHERE id = ?').run(role, id);
+        await db.query('UPDATE users SET role = $1 WHERE id = $2', [role, id]);
         res.json({ message: 'User role updated successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Server error' });
     }
 });
 
-app.post('/api/admin/bulk-create-users', authenticateToken, (req: any, res: any) => {
+app.post('/api/admin/bulk-create-users', authenticateToken, async (req: any, res: any) => {
     if (req.user.role !== 'admin') {
         return res.status(403).json({ error: 'Forbidden. Admins only.' });
     }
@@ -223,8 +227,6 @@ app.post('/api/admin/bulk-create-users', authenticateToken, (req: any, res: any)
         errors: [] as string[]
     };
 
-    const insert = db.prepare('INSERT INTO users (username, password, name, email, role, expiration_date) VALUES (?, ?, ?, ?, ?, ?)');
-
     for (const userData of users) {
         const { username, password, name, email, expirationDate } = userData;
         if (!username || !password || !name || !email) {
@@ -235,11 +237,12 @@ app.post('/api/admin/bulk-create-users', authenticateToken, (req: any, res: any)
 
         try {
             const hashedPassword = bcrypt.hashSync(password, 10);
-            insert.run(username, hashedPassword, name, email, 'user', expirationDate || null);
+            await db.query('INSERT INTO users (username, password, name, email, role, expiration_date) VALUES ($1, $2, $3, $4, $5, $6)',
+                [username, hashedPassword, name, email, 'user', expirationDate || null]);
             results.success++;
         } catch (error: any) {
             results.failed++;
-            if (error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+            if (error.code === '23505') {
                 results.errors.push(`User ${username}: Username or Email already exists`);
             } else {
                 results.errors.push(`User ${username}: ${error.message}`);
@@ -250,12 +253,10 @@ app.post('/api/admin/bulk-create-users', authenticateToken, (req: any, res: any)
     res.json({ message: 'Bulk processing complete', results });
 });
 
-app.post('/api/webhooks/payment', (req, res) => {
+app.post('/api/webhooks/payment', async (req, res) => {
     const payload = req.body;
     console.log('Webhook received:', JSON.stringify(payload, null, 2));
 
-    // Kirvano uses 'status' and 'customer.email'
-    // Hotmart uses 'status' and 'buyer.email'
     const status = payload.status || (payload.data && payload.data.status);
     const email = payload.customer?.email ||
         payload.data?.buyer?.email ||
@@ -270,30 +271,24 @@ app.post('/api/webhooks/payment', (req, res) => {
     }
 
     if (!email) {
-        console.log('No email found in webhook');
         return res.status(400).json({ error: 'Email not found in payload' });
     }
 
     try {
-        // Expiration: +30 days
         const expiration = new Date();
         expiration.setDate(expiration.getDate() + 30);
         const expStr = expiration.toISOString();
 
-        // Check if user exists
-        const user = db.prepare('SELECT id FROM users WHERE email = ?').get(email) as any;
+        const userResult = await db.query('SELECT id FROM users WHERE email = $1', [email]);
+        const user = userResult.rows[0];
 
         if (user) {
-            // Activate and extend
-            db.prepare('UPDATE users SET active = 1, expiration_date = ? WHERE id = ?').run(expStr, user.id);
-            console.log(`User ${email} activated/extended.`);
+            await db.query('UPDATE users SET active = 1, expiration_date = $1 WHERE id = $2', [expStr, user.id]);
         } else {
-            // Create new user (using email as username)
             const username = email.split('@')[0] + Math.floor(Math.random() * 1000);
-            const defaultPassword = bcrypt.hashSync('pente123', 10); // Default pass, user should change
-            db.prepare('INSERT INTO users (username, name, email, password, role, active, expiration_date) VALUES (?, ?, ?, ?, ?, ?, ?)')
-                .run(username, email.split('@')[0], email, defaultPassword, 'user', 1, expStr);
-            console.log(`New user created for ${email}.`);
+            const defaultPassword = bcrypt.hashSync('pente123', 10);
+            await db.query('INSERT INTO users (username, name, email, password, role, active, expiration_date) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+                [username, email.split('@')[0], email, defaultPassword, 'user', 1, expStr]);
         }
 
         res.json({ message: 'User access updated' });
@@ -303,13 +298,10 @@ app.post('/api/webhooks/payment', (req, res) => {
     }
 });
 
-
 // Serve static files from the React app
 const distPath = path.join(__dirname, '../dist');
 app.use(express.static(distPath));
 
-// The "catchall" handler: for any request that doesn't
-// match one above, send back React's index.html file.
 app.get('*', (req, res) => {
     res.sendFile(path.join(distPath, 'index.html'));
 });
