@@ -13,6 +13,7 @@ const pool = new Pool({
 
 // Initialize database tables
 export async function initDB() {
+  console.log('Attempting to initialize database...');
   try {
     const client = await pool.connect();
     console.log('Connected to PostgreSQL successfully.');
@@ -48,9 +49,11 @@ export async function initDB() {
     }
 
     client.release();
-  } catch (err) {
-    console.error('Error initializing PostgreSQL:', err);
-    // Don't exit process, maybe it retry later
+    return true;
+  } catch (err: any) {
+    console.error('FATAL ERROR: Error initializing PostgreSQL:', err.message);
+    if (err.code) console.error('Error Code:', err.code);
+    return false;
   }
 }
 

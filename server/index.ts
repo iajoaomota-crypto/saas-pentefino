@@ -32,6 +32,26 @@ const authenticateToken = (req: any, res: any, next: any) => {
     });
 };
 
+// --- HEALTH CHECK ---
+app.get('/api/health', async (req, res) => {
+    try {
+        const dbCheck = await db.query('SELECT NOW()');
+        res.json({
+            status: 'ok',
+            database: 'connected',
+            time: dbCheck.rows[0].now,
+            env: process.env.NODE_ENV
+        });
+    } catch (error: any) {
+        res.status(500).json({
+            status: 'error',
+            database: 'disconnected',
+            message: error.message,
+            code: error.code
+        });
+    }
+});
+
 // --- AUTH ROUTES ---
 app.post('/api/auth/register', async (req, res) => {
     const { username, password, name, email } = req.body;
