@@ -9,9 +9,15 @@ const connectionString =
   process.env.DATABASE_URL ||
   'postgres://postgres:87e821b1d9d4b752471f@saas_backend_postgres:5432/saas_backend?sslmode=disable';
 
+console.log('DB Config:', {
+  hasUrl: !!connectionString,
+  urlStart: connectionString ? connectionString.substring(0, 20) + '...' : 'none',
+  isVercel: !!process.env.VERCEL
+});
+
 const pool = new Pool({
   connectionString,
-  ssl: (connectionString.includes('sslmode=disable') || !connectionString.includes('vercel-storage.com')) ? false : { rejectUnauthorized: false }
+  ssl: (connectionString.includes('sslmode=disable')) ? false : { rejectUnauthorized: false }
 });
 
 // Initialize database tables
