@@ -53,6 +53,9 @@ interface MetricSectionProps {
         balance: number;
         totalCommissions: number;
         netProfit: number;
+        totalPendingFixed?: number;
+        totalPendingVariable?: number;
+        totalPendingAccounts?: number;
         comparison?: {
             incomeTrend?: string;
             expenseTrend?: string;
@@ -152,7 +155,7 @@ export const MetricSection: React.FC<MetricSectionProps> = ({ stats, darkMode })
                 </div>
             </Card>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 <MetricCard
                     title="Receita Bruta"
                     value={stats.totalIncome}
@@ -178,6 +181,18 @@ export const MetricSection: React.FC<MetricSectionProps> = ({ stats, darkMode })
                     value={stats.netProfit}
                     trend={stats.comparison?.profitTrend}
                     icon={TrendingUp}
+                    color="amber"
+                />
+                <MetricCard
+                    title="Fixas Pendentes"
+                    value={stats.totalPendingFixed || 0}
+                    icon={AlertCircle}
+                    color="red"
+                />
+                <MetricCard
+                    title="Variáveis Pendentes"
+                    value={stats.totalPendingVariable || 0}
+                    icon={AlertCircle}
                     color="amber"
                 />
             </div>

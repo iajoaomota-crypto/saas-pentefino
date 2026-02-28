@@ -81,14 +81,47 @@ export default function HomeDashboard() {
         return (
           <div className="space-y-8 pb-12">
             <MetricSection stats={stats} darkMode={darkMode} />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <DashboardCharts transactions={filteredTransactions} darkMode={darkMode} />
-              <TransactionsModule
-                transactions={filteredTransactions.slice(0, 5)}
-                darkMode={darkMode}
-                onDelete={handleDeleteTransaction}
-                onEdit={(t) => { setEditingTransaction(t); setShowAddModal(true); }}
-              />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2">
+                <DashboardCharts transactions={filteredTransactions} darkMode={darkMode} />
+              </div>
+              <div className="space-y-8">
+                {/* Pending Accounts Section */}
+                <Card className="p-6 transition-all duration-300 bg-white dark:bg-[#1E1E1E] border-none shadow-sm hover:shadow-md">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-sm font-black uppercase tracking-widest text-gray-400">Contas Pendentes</h3>
+                    <button onClick={() => setActiveTab('contas')} className="text-[10px] font-bold text-[#00d26a] hover:underline uppercase">Ver todas</button>
+                  </div>
+                  <div className="space-y-4">
+                    {(stats as any).pendingAccountsList && (stats as any).pendingAccountsList.length > 0 ? (
+                      (stats as any).pendingAccountsList.map((acc: any) => (
+                        <div key={acc.id} className="flex justify-between items-center group">
+                          <div className="flex flex-col">
+                            <span className="text-sm font-bold text-gray-700 dark:text-gray-200 group-hover:text-[#00d26a] transition-colors">{acc.name}</span>
+                            <span className="text-[10px] text-gray-400 font-medium whitespace-nowrap">Vence dia {acc.dueDate}</span>
+                          </div>
+                          <span className="text-sm font-black text-red-500">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(acc.amount)}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="py-8 text-center text-gray-400 text-xs italic">Nenhuma conta pendente. 🎉</div>
+                    )}
+                  </div>
+                  {(stats as any).totalPendingAccounts > 0 && (
+                    <div className="mt-6 pt-6 border-t border-gray-100 dark:border-white/5 flex justify-between items-end">
+                      <span className="text-[10px] font-bold text-gray-400 uppercase">Total Pendente</span>
+                      <span className="text-lg font-black text-red-500">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format((stats as any).totalPendingAccounts)}</span>
+                    </div>
+                  )}
+                </Card>
+
+                <TransactionsModule
+                  transactions={filteredTransactions.slice(0, 5)}
+                  darkMode={darkMode}
+                  onDelete={handleDeleteTransaction}
+                  onEdit={(t) => { setEditingTransaction(t); setShowAddModal(true); }}
+                />
+              </div>
             </div>
           </div>
         );

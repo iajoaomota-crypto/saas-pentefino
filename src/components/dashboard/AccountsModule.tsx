@@ -28,21 +28,28 @@ export const AccountsModule: React.FC<AccountsModuleProps> = ({
 
     const pendingCount = filteredAccounts.filter(a => a.status === 'pending').length;
     const paidCount = filteredAccounts.filter(a => a.status === 'paid').length;
-    const totalAmount = filteredAccounts.reduce((sum, a) => sum + a.amount, 0);
+    const catTotal = filteredAccounts.reduce((sum, a) => sum + a.amount, 0);
+
+    const allPending = accounts.filter(a => a.status === 'pending');
+    const totalPendingAll = allPending.reduce((sum, a) => sum + a.amount, 0);
 
     return (
         <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <Card className="p-4 bg-white dark:bg-[#1E1E1E]">
-                    <span className="text-[10px] uppercase font-bold text-gray-400 block mb-1">Total em Contas</span>
-                    <span className="text-xl font-bold text-gray-800 dark:text-white">{formatCurrency(totalAmount)}</span>
+                    <span className="text-[10px] uppercase font-bold text-gray-400 block mb-1">Total {activeTab === 'fixas' ? 'Fixas' : 'Variáveis'}</span>
+                    <span className="text-xl font-bold text-gray-800 dark:text-white">{formatCurrency(catTotal)}</span>
+                </Card>
+                <Card className="p-4 bg-white dark:bg-[#1E1E1E] border-l-4 border-l-red-500">
+                    <span className="text-[10px] uppercase font-bold text-red-500 block mb-1">Total Pendente (Geral)</span>
+                    <span className="text-xl font-bold text-red-500">{formatCurrency(totalPendingAll)}</span>
                 </Card>
                 <Card className="p-4 bg-white dark:bg-[#1E1E1E]">
-                    <span className="text-[10px] uppercase font-bold text-gray-400 block mb-1">Pendentes</span>
+                    <span className="text-[10px] uppercase font-bold text-gray-400 block mb-1">Pendentes ({activeTab === 'fixas' ? 'F' : 'V'})</span>
                     <span className="text-xl font-bold text-amber-500">{pendingCount}</span>
                 </Card>
                 <Card className="p-4 bg-white dark:bg-[#1E1E1E]">
-                    <span className="text-[10px] uppercase font-bold text-gray-400 block mb-1">Pagas</span>
+                    <span className="text-[10px] uppercase font-bold text-gray-400 block mb-1">Pagas ({activeTab === 'fixas' ? 'F' : 'V'})</span>
                     <span className="text-xl font-bold text-[#00d26a]">{paidCount}</span>
                 </Card>
             </div>

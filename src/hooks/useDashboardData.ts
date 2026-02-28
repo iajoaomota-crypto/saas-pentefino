@@ -146,6 +146,19 @@ export function useDashboardData() {
 
         const currentStats = calculateStats(filteredTransactions);
 
+        // Account Stats (Global pending)
+        const pendingFixed = accounts.filter(a => a.type === 'fixas' && a.status === 'pending');
+        const pendingVariable = accounts.filter(a => a.type === 'variaveis' && a.status === 'pending');
+
+        const totalPendingFixed = sumAmounts(pendingFixed.map(a => a.amount));
+        const totalPendingVariable = sumAmounts(pendingVariable.map(a => a.amount));
+        const totalPendingAccounts = fromCents(toCents(totalPendingFixed) + toCents(totalPendingVariable));
+
+        // Sorting for Dashboard (nearest first)
+        const pendingAccountsList = [...pendingFixed, ...pendingVariable]
+            .sort((a, b) => parseInt(a.dueDate) - parseInt(b.dueDate))
+            .slice(0, 5);
+
         // Comparison Logic
         let prevTransactions: Transaction[] = [];
         const now = new Date();
@@ -187,6 +200,10 @@ export function useDashboardData() {
 
         return {
             ...currentStats,
+            totalPendingFixed,
+            totalPendingVariable,
+            totalPendingAccounts,
+            pendingAccountsList,
             comparison: prevStats ? {
                 incomeTrend: getTrend(currentStats.totalIncome, prevStats.totalIncome),
                 expenseTrend: getTrend(currentStats.totalExpense, prevStats.totalExpense),
@@ -194,7 +211,7 @@ export function useDashboardData() {
                 balanceTrend: getTrend(currentStats.balance, prevStats.balance)
             } : undefined
         };
-    }, [filteredTransactions, transactions, dateFilter, commissionRate]);
+    }, [filteredTransactions, transactions, accounts, dateFilter, commissionRate]);
 
     // Handlers
     const handleAddTransaction = async (t: Omit<Transaction, 'id'>) => {
