@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 const { Pool } = pg;
 
 // Connection string from environment variable or default
-const connectionString = process.env.DATABASE_URL || 'postgres://postgres:87e821b1d9d4b752471f@saas_backend_postgres:5432/postgres?sslmode=disable';
+const connectionString = process.env.DATABASE_URL || 'postgres://postgres:87e821b1d9d4b752471f@saas_backend_postgres:5432/saas_backend?sslmode=disable';
 
 const pool = new Pool({
   connectionString,
