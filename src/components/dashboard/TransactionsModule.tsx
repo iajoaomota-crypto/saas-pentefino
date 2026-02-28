@@ -7,24 +7,26 @@ import { Transaction } from '../../types';
 
 interface TransactionsModuleProps {
     transactions: Transaction[];
-    type: 'income' | 'expense';
+    type?: 'income' | 'expense';
+    darkMode?: boolean;
     onEdit: (transaction: Transaction) => void;
     onDelete: (id: string | number) => void;
-    subTab: string;
-    setSubTab: (tab: any) => void;
-    searchTerm: string;
-    setSearchTerm: (term: string) => void;
+    subTab?: string;
+    setSubTab?: (tab: any) => void;
+    searchTerm?: string;
+    setSearchTerm?: (term: string) => void;
 }
 
 export const TransactionsModule: React.FC<TransactionsModuleProps> = ({
-    transactions,
-    type,
+    transactions = [],
+    type = 'income',
+    darkMode = false,
     onEdit,
     onDelete,
-    subTab,
-    setSubTab,
-    searchTerm,
-    setSearchTerm
+    subTab = '',
+    setSubTab = (_: any) => { },
+    searchTerm = '',
+    setSearchTerm = (_: any) => { }
 }) => {
     const isIncome = type === 'income';
 

@@ -17,6 +17,7 @@ export default function HomeDashboard() {
   const {
     transactions, accounts, closings, isOnline,
     dateFilter, setDateFilter, startDate, setStartDate, endDate, setEndDate,
+    searchTerm, setSearchTerm, subTab, setSubTab, accountsTab, setAccountsTab,
     filteredTransactions, stats,
     handleAddTransaction, handleUpdateTransaction, handleDeleteTransaction,
     handleAddAccount, handleUpdateAccount, handleDeleteAccount, handleToggleAccountStatus
@@ -65,19 +66,26 @@ export default function HomeDashboard() {
         return (
           <TransactionsModule
             transactions={filteredTransactions.filter(t => t.type === (activeTab === 'receitas' ? 'income' : 'expense'))}
+            type={activeTab === 'receitas' ? 'income' : 'expense'}
             darkMode={darkMode}
             onDelete={handleDeleteTransaction}
             onEdit={(t) => { setEditingTransaction(t); setShowAddModal(true); }}
+            subTab={subTab}
+            setSubTab={setSubTab}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
           />
         );
       case 'contas':
         return (
           <AccountsModule
             accounts={accounts}
-            darkMode={darkMode}
-            onDelete={handleDeleteAccount}
+            activeTab={accountsTab}
+            setActiveTab={setAccountsTab}
+            onAddAccount={() => setShowAccountModal(true)}
+            onEditAccount={(acc) => { setEditingAccount(acc); setShowAccountModal(true); }}
+            onDeleteAccount={handleDeleteAccount}
             onToggleStatus={handleToggleAccountStatus}
-            onEdit={(acc) => { setEditingAccount(acc); setShowAccountModal(true); }}
           />
         );
       default:

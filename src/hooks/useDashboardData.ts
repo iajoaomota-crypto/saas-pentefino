@@ -12,6 +12,9 @@ export function useDashboardData() {
     const [dateFilter, setDateFilter] = useState('7days');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [subTab, setSubTab] = useState('services');
+    const [accountsTab, setAccountsTab] = useState<'fixas' | 'variaveis'>('fixas');
 
     // Initial Load
     useEffect(() => {
@@ -132,6 +135,12 @@ export function useDashboardData() {
         setStartDate,
         endDate,
         setEndDate,
+        searchTerm,
+        setSearchTerm,
+        subTab,
+        setSubTab,
+        accountsTab,
+        setAccountsTab,
         filteredTransactions,
         stats,
         handleAddTransaction,

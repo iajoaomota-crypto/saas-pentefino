@@ -5,15 +5,60 @@ import {
 } from 'recharts';
 import { Card } from '../ui';
 import { cn } from '../../utils';
-import { BRAND_COLORS } from '../../constants/config';
+import { BRAND_COLORS, REVENUE_CATEGORIES, EXPENSE_CATEGORIES, PAYMENT_METHODS } from '../../constants/config';
 
 interface DashboardChartsProps {
-    chartData: any[];
-    categoryData: any[];
+    transactions: any[];
     darkMode: boolean;
 }
 
-export const DashboardCharts: React.FC<DashboardChartsProps> = ({ chartData, categoryData, darkMode }) => {
+export const DashboardCharts: React.FC<DashboardChartsProps> = ({ transactions = [], darkMode }) => {
+    // Process chart data (Flow)
+    const chartData = React.useMemo(() => {
+        const last7Days = Array.from({ length: 7 }, (_, i) => {
+            const d = new Date();
+            d.setDate(d.getDate() - (6 - i));
+            return d.toLocaleDateString('pt-BR');
+        });
+
+        return last7Days.map(date => {
+            const dayTransactions = (transactions || []).filter(t => t.date === date);
+            const receita = dayTransactions
+                .filter(t => t.type === 'income')
+                .reduce((acc, t) => acc + (t.amount || 0), 0);
+            const despesa = dayTransactions
+                .filter(t => t.type === 'expense')
+                .reduce((acc, t) => acc + (t.amount || 0), 0);
+
+            return {
+                name: date.split('/')[0] + '/' + date.split('/')[1],
+                receita,
+                despesa
+            };
+        });
+    }, [transactions]);
+
+    // Process category distribution
+    const categoryData = React.useMemo(() => {
+        if (!transactions || transactions.length === 0) return [];
+
+        const categories = [...new Set(transactions.map(t => t.category))];
+        return categories.map(cat => {
+            const value = transactions
+                .filter(t => t.category === cat)
+                .reduce((acc, t) => acc + (t.amount || 0), 0);
+
+            // Find color from payment methods or defaults
+            const method = PAYMENT_METHODS.find(m => m.label === cat);
+
+            return {
+                name: cat,
+                value,
+                color: method?.color || BRAND_COLORS.primary
+            };
+        }).filter(c => c.value > 0);
+    }, [transactions]);
+
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card className="p-6 bg-white dark:bg-[#1E1E1E] border-none shadow-sm">
@@ -43,6 +88,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ chartData, cat
                                 axisLine={false}
                                 tickLine={false}
                                 tick={{ fill: '#9ca3af', fontSize: 12 }}
+                                dy={0}
                                 tickFormatter={(value) => `R$ ${value}`}
                             />
                             <Tooltip
