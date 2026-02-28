@@ -44,6 +44,8 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
             localStorage.removeItem('pentefino_data');
             localStorage.removeItem('pentefino_accounts');
             localStorage.removeItem('pentefino_closings');
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('user');
             window.location.reload();
         }
     };

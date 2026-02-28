@@ -47,6 +47,44 @@ export async function initDB() {
           expiration_date TIMESTAMP,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
+
+        CREATE TABLE IF NOT EXISTS transactions (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+          type TEXT NOT NULL, -- 'income' | 'expense'
+          "desc" TEXT NOT NULL,
+          amount NUMERIC(15, 2) NOT NULL,
+          category TEXT,
+          date TEXT, -- format DD/MM/YYYY
+          barber TEXT,
+          revenue_type TEXT, -- 'services' | 'products'
+          expense_type TEXT, -- 'professional' | 'personal'
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS accounts (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+          type TEXT NOT NULL, -- 'fixas' | 'variaveis'
+          name TEXT NOT NULL,
+          amount NUMERIC(15, 2) NOT NULL,
+          due_date TEXT, -- format DD/MM/YYYY
+          status TEXT DEFAULT 'pending', -- 'pending' | 'paid'
+          paid_at TEXT,
+          recurrence TEXT, -- 'mensal' | 'unitaria' | etc
+          variable_type TEXT, -- 'recorrente' | 'unitaria'
+          reference_month TEXT, -- format M/YYYY
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS closings (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+          date TEXT NOT NULL, -- format DD/MM/YYYY
+          total_amount NUMERIC(15, 2) NOT NULL,
+          notes TEXT,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
       `);
 
       // Create master user if not exists

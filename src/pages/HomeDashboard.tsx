@@ -22,7 +22,7 @@ export default function HomeDashboard() {
     dateFilter, setDateFilter, startDate, setStartDate, endDate, setEndDate,
     searchTerm, setSearchTerm, subTab, setSubTab, accountsTab, setAccountsTab,
     commissionRate, setCommissionRate,
-    filteredTransactions, stats,
+    filteredTransactions, stats, loading,
     handleAddTransaction, handleUpdateTransaction, handleDeleteTransaction,
     handleAddAccount, handleUpdateAccount, handleDeleteAccount, handleToggleAccountStatus,
     handleAddClosing
@@ -43,10 +43,24 @@ export default function HomeDashboard() {
   const isAdmin = user.role === 'admin';
 
   const handleLogout = () => {
-    sessionStorage.removeItem('pentefino_token');
-    localStorage.removeItem('pentefino_user');
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('pentefino_data');
+    localStorage.removeItem('pentefino_accounts');
+    localStorage.removeItem('pentefino_closings');
     navigate('/login');
   };
+
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gray-50 dark:bg-[#121212]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-[#00d26a] border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm font-medium text-gray-400 animate-pulse">Sincronizando seus dados...</p>
+        </div>
+      </div>
+    );
+  }
 
   const sidebarItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },

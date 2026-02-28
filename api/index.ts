@@ -330,5 +330,112 @@ if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
         console.log(`Server running on port ${PORT}`);
     });
 }
+// --- DATA ROUTES (TRANSACTIONS, ACCOUNTS, CLOSINGS) ---
+
+app.get('/api/data', authenticateToken, async (req: any, res: any) => {
+    try {
+        const userId = req.user.id;
+        const transactions = await db.query('SELECT * FROM transactions WHERE user_id = $1 ORDER BY date DESC, id DESC', [userId]);
+        const accounts = await db.query('SELECT * FROM accounts WHERE user_id = $1 ORDER BY created_at DESC', [userId]);
+        const closings = await db.query('SELECT * FROM closings WHERE user_id = $1 ORDER BY date DESC', [userId]);
+
+        res.json({
+            transactions: transactions.rows,
+            accounts: accounts.rows,
+            closings: closings.rows
+        });
+    } catch (error) {
+        console.error('Fetch data error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Transactions CRUD
+app.post('/api/transactions', authenticateToken, async (req: any, res: any) => {
+    const { type, desc, amount, category, date, barber, revenueType, expenseType } = req.body;
+    try {
+        const result = await db.query(
+            'INSERT INTO transactions (user_id, type, "desc", amount, category, date, barber, revenue_type, expense_type) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
+            [req.user.id, type, desc, amount, category, date, barber, revenueType, expenseType]
+        );
+        res.status(201).json(result.rows[0]);
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.put('/api/transactions/:id', authenticateToken, async (req: any, res: any) => {
+    const { type, desc, amount, category, date, barber, revenueType, expenseType } = req.body;
+    try {
+        const result = await db.query(
+            'UPDATE transactions SET type = $1, "desc" = $2, amount = $3, category = $4, date = $5, barber = $6, revenue_type = $7, expense_type = $8 WHERE id = $9 AND user_id = $10 RETURNING *',
+            [type, desc, amount, category, date, barber, revenueType, expenseType, req.params.id, req.user.id]
+        );
+        if (result.rowCount === 0) return res.status(404).json({ error: 'Not found' });
+        res.json(result.rows[0]);
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.delete('/api/transactions/:id', authenticateToken, async (req: any, res: any) => {
+    try {
+        await db.query('DELETE FROM transactions WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
+        res.json({ message: 'Deleted' });
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Accounts CRUD
+app.post('/api/accounts', authenticateToken, async (req: any, res: any) => {
+    const { type, name, amount, dueDate, status, paidAt, recurrence, variableType, referenceMonth } = req.body;
+    try {
+        const result = await db.query(
+            'INSERT INTO accounts (user_id, type, name, amount, due_date, status, paid_at, recurrence, variable_type, reference_month) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
+            [req.user.id, type, name, amount, dueDate, status, paidAt, recurrence, variableType, referenceMonth]
+        );
+        res.status(201).json(result.rows[0]);
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.put('/api/accounts/:id', authenticateToken, async (req: any, res: any) => {
+    const { type, name, amount, dueDate, status, paidAt, recurrence, variableType, referenceMonth } = req.body;
+    try {
+        const result = await db.query(
+            'UPDATE accounts SET type = $1, name = $2, amount = $3, due_date = $4, status = $5, paid_at = $6, recurrence = $7, variable_type = $8, reference_month = $9 WHERE id = $10 AND user_id = $11 RETURNING *',
+            [type, name, amount, dueDate, status, paidAt, recurrence, variableType, referenceMonth, req.params.id, req.user.id]
+        );
+        if (result.rowCount === 0) return res.status(404).json({ error: 'Not found' });
+        res.json(result.rows[0]);
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.delete('/api/accounts/:id', authenticateToken, async (req: any, res: any) => {
+    try {
+        await db.query('DELETE FROM accounts WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
+        res.json({ message: 'Deleted' });
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Closings CRUD
+app.post('/api/closings', authenticateToken, async (req: any, res: any) => {
+    const { date, totalAmount, notes } = req.body;
+    try {
+        const result = await db.query(
+            'INSERT INTO closings (user_id, date, total_amount, notes) VALUES ($1, $2, $3, $4) RETURNING *',
+            [req.user.id, date, totalAmount, notes]
+        );
+        res.status(201).json(result.rows[0]);
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
 
 export default app;
