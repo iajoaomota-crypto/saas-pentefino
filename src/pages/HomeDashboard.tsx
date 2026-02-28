@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, TrendingUp, TrendingDown, DollarSign, Calendar, BarChart3, FileText, Settings, Menu, X, Scissors, Wifi, WifiOff, Plus
+  LayoutDashboard, TrendingUp, TrendingDown, DollarSign, Calendar, BarChart3, FileText, Settings, Menu, X, Scissors, Wifi, WifiOff, Plus, Shield
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../utils';
@@ -38,6 +38,9 @@ export default function HomeDashboard() {
   const [editingTransaction, setEditingTransaction] = useState<any>(null);
   const [editingAccount, setEditingAccount] = useState<any>(null);
   const [editingClosing, setEditingClosing] = useState<any>(null);
+
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const isAdmin = user.role === 'admin';
 
   const handleLogout = () => {
     // Clear auth-related storage
@@ -167,6 +170,16 @@ export default function HomeDashboard() {
               <item.icon size={18} /> <span className="text-sm">{item.label}</span>
             </button>
           ))}
+          {isAdmin && (
+            <div className="pt-4 mt-4 border-t border-gray-100 dark:border-white/5">
+              <button
+                onClick={() => navigate('/admin')}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-all text-left"
+              >
+                <Shield size={18} /> <span className="text-sm">Painel Admin</span>
+              </button>
+            </div>
+          )}
         </nav>
       </aside>
 
