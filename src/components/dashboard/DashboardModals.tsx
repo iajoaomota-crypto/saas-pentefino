@@ -123,7 +123,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                                 type="text"
                                 value={barber}
                                 onChange={(e) => setBarber(e.target.value)}
-                                placeholder="Nome do profissional"
+                                placeholder="Nome do profissional (Opcional)"
                                 className={cn("w-full p-3 border rounded-xl text-sm outline-none", darkMode ? "bg-[#0f172a] border-white/10 text-white" : "bg-gray-50 border-gray-200")}
                             />
                         </div>

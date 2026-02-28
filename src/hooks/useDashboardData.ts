@@ -338,6 +338,74 @@ export function useDashboardData() {
         }
     };
 
+    // Synchronization of unsynced local data
+    useEffect(() => {
+        if (isOnline && !loading) {
+            const syncData = async () => {
+                const unsyncedTransactions = transactions.filter(t => t.synced === false);
+                const unsyncedAccounts = accounts.filter(a => a.synced === false);
+                const unsyncedClosings = closings.filter(c => c.synced === false);
+
+                if (unsyncedTransactions.length === 0 && unsyncedAccounts.length === 0 && unsyncedClosings.length === 0) return;
+
+                console.log("Syncing unsynced local data to server...");
+
+                // Transactions
+                for (const t of unsyncedTransactions) {
+                    try {
+                        const res = await fetch('/api/transactions', {
+                            method: 'POST',
+                            headers: { ...getAuthHeader(), 'Content-Type': 'application/json' },
+                            body: JSON.stringify(t)
+                        });
+                        if (res.ok) {
+                            const synced = await res.json();
+                            setTransactions(prev => prev.map(item => item.id === t.id ? synced : item));
+                        }
+                    } catch (e) {
+                        console.error("Failed to sync transaction:", t.id, e);
+                    }
+                }
+
+                // Accounts
+                for (const a of unsyncedAccounts) {
+                    try {
+                        const res = await fetch('/api/accounts', {
+                            method: 'POST',
+                            headers: { ...getAuthHeader(), 'Content-Type': 'application/json' },
+                            body: JSON.stringify(a)
+                        });
+                        if (res.ok) {
+                            const synced = await res.json();
+                            setAccounts(prev => prev.map(item => item.id === a.id ? synced : item));
+                        }
+                    } catch (e) {
+                        console.error("Failed to sync account:", a.id, e);
+                    }
+                }
+
+                // Closings
+                for (const c of unsyncedClosings) {
+                    try {
+                        const res = await fetch('/api/closings', {
+                            method: 'POST',
+                            headers: { ...getAuthHeader(), 'Content-Type': 'application/json' },
+                            body: JSON.stringify(c)
+                        });
+                        if (res.ok) {
+                            const synced = await res.json();
+                            setClosings(prev => prev.map(item => item.id === c.id ? synced : item));
+                        }
+                    } catch (e) {
+                        console.error("Failed to sync closing:", c.id, e);
+                    }
+                }
+            };
+
+            syncData();
+        }
+    }, [isOnline, loading, transactions, accounts, closings]);
+
     return {
         transactions, accounts, closings, isOnline, loading,
         dateFilter, setDateFilter, startDate, setStartDate, endDate, setEndDate,
