@@ -1,0 +1,27 @@
+{
+    "name": "Pente Fino - Gestão Barbearia",
+    "short_name": "Pente Fino",
+    "description": "Sistema de gestão financeira para barbearias e profissionais da beleza.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#121212",
+    "theme_color": "#00d26a",
+    "icons": [
+        {
+            "src": "favicon.ico",
+            "sizes": "64x64 32x32 24x24 16x16",
+            "type": "image/x-icon"
+        },
+        {
+            "src": "pwa-192x192.png",
+            "type": "image/png",
+            "sizes": "192x192"
+        },
+        {
+            "src": "pwa-512x512.png",
+            "type": "image/png",
+            "sizes": "512x512",
+            "purpose": "any maskable"
+        }
+    ]
+}

@@ -86,13 +86,18 @@ export function useDashboardData() {
             if (dateFilter === 'today') {
                 return tDate.getTime() === now.getTime();
             }
+            if (dateFilter === 'yesterday') {
+                const yesterday = new Date(now);
+                yesterday.setDate(now.getDate() - 1);
+                return tDate.getTime() === yesterday.getTime();
+            }
             if (dateFilter === '7days') {
-                const limit = new Date();
+                const limit = new Date(now);
                 limit.setDate(now.getDate() - 7);
                 return tDate >= limit;
             }
             if (dateFilter === '14days') {
-                const limit = new Date();
+                const limit = new Date(now);
                 limit.setDate(now.getDate() - 14);
                 return tDate >= limit;
             }
@@ -100,35 +105,85 @@ export function useDashboardData() {
                 return tDate.getMonth() === now.getMonth() && tDate.getFullYear() === now.getFullYear();
             }
             if (dateFilter === 'custom' && startDate && endDate) {
-                const start = new Date(startDate);
-                const end = new Date(endDate);
-                return tDate >= start && tDate <= end;
+                // Ensure dates are parsed as local YYYY-MM-DD
+                const [sY, sM, sD] = startDate.split('-').map(Number);
+                const [eY, eM, eD] = endDate.split('-').map(Number);
+                const start = new Date(sY, sM - 1, sD);
+                const end = new Date(eY, eM - 1, eD);
+
+                return tDate.getTime() >= start.getTime() && tDate.getTime() <= end.getTime();
             }
             return true;
         });
     }, [transactions, dateFilter, startDate, endDate, searchTerm]);
 
     const stats = useMemo(() => {
-        const incomeTransactions = filteredTransactions.filter(t => t.type === 'income');
-        const expenseTransactions = filteredTransactions.filter(t => t.type === 'expense');
+        const calculateStats = (filteredList: Transaction[]) => {
+            const incomeTransactions = filteredList.filter(t => t.type === 'income');
+            const expenseTransactions = filteredList.filter(t => t.type === 'expense');
 
-        const totalIncome = sumAmounts(incomeTransactions.map(t => t.amount));
-        const totalExpense = sumAmounts(expenseTransactions.map(t => t.amount));
-        const serviceIncome = sumAmounts(incomeTransactions.filter(t => t.revenueType === 'services').map(t => t.amount));
-        const totalCommissions = (serviceIncome * commissionRate) / 100;
+            const totalIncome = sumAmounts(incomeTransactions.map(t => t.amount));
+            const totalExpense = sumAmounts(expenseTransactions.map(t => t.amount));
+            const serviceIncome = sumAmounts(incomeTransactions.filter(t => t.revenueType === 'services').map(t => t.amount));
+            const totalCommissions = (serviceIncome * commissionRate) / 100;
 
-        const balance = fromCents(toCents(totalIncome) - toCents(totalExpense));
-        const netProfit = fromCents(toCents(balance) - toCents(totalCommissions));
+            const balance = fromCents(toCents(totalIncome) - toCents(totalExpense));
+            const netProfit = fromCents(toCents(balance) - toCents(totalCommissions));
+
+            return { totalIncome, totalExpense, totalCommissions, balance, netProfit, count: filteredList.length };
+        };
+
+        const currentStats = calculateStats(filteredTransactions);
+
+        // Comparison Logic
+        let prevTransactions: Transaction[] = [];
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+
+        if (dateFilter === 'today') {
+            const yesterday = new Date(now);
+            yesterday.setDate(now.getDate() - 1);
+            prevTransactions = transactions.filter(t => {
+                const [d, m, y] = t.date.split('/').map(Number);
+                const tDate = new Date(y, m - 1, d);
+                return tDate.getTime() === yesterday.getTime();
+            });
+        } else if (dateFilter === '7days') {
+            const start = new Date(now); start.setDate(now.getDate() - 14);
+            const end = new Date(now); end.setDate(now.getDate() - 7);
+            prevTransactions = transactions.filter(t => {
+                const [d, m, y] = t.date.split('/').map(Number);
+                const tDate = new Date(y, m - 1, d);
+                return tDate >= start && tDate < end;
+            });
+        } else if (dateFilter === 'month') {
+            const prevMonth = now.getMonth() === 0 ? 11 : now.getMonth() - 1;
+            const prevYear = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
+            prevTransactions = transactions.filter(t => {
+                const [d, m, y] = t.date.split('/').map(Number);
+                const tDate = new Date(y, m - 1, d);
+                return tDate.getMonth() === prevMonth && tDate.getFullYear() === prevYear;
+            });
+        }
+
+        const prevStats = prevTransactions.length > 0 ? calculateStats(prevTransactions) : null;
+
+        const getTrend = (curr: number, prev: number | undefined) => {
+            if (prev === undefined || prev === 0) return undefined;
+            const diff = ((curr - prev) / Math.abs(prev)) * 100;
+            return (diff > 0 ? '+' : '') + diff.toFixed(1) + '%';
+        };
 
         return {
-            totalIncome,
-            totalExpense,
-            totalCommissions,
-            balance,
-            netProfit,
-            transactionCount: filteredTransactions.length
+            ...currentStats,
+            comparison: prevStats ? {
+                incomeTrend: getTrend(currentStats.totalIncome, prevStats.totalIncome),
+                expenseTrend: getTrend(currentStats.totalExpense, prevStats.totalExpense),
+                profitTrend: getTrend(currentStats.netProfit, prevStats.netProfit),
+                balanceTrend: getTrend(currentStats.balance, prevStats.balance)
+            } : undefined
         };
-    }, [filteredTransactions, commissionRate]);
+    }, [filteredTransactions, transactions, dateFilter, commissionRate]);
 
     // Handlers
     const handleAddTransaction = (t: Omit<Transaction, 'id'>) => {

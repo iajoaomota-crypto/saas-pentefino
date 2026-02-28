@@ -220,6 +220,7 @@ export default function HomeDashboard() {
             <div className="flex bg-gray-100 dark:bg-white/5 p-1 rounded-xl">
               {[
                 { id: 'today', label: 'Hoje' },
+                { id: 'yesterday', label: 'Ontem' },
                 { id: '7days', label: '7 dias' },
                 { id: '14days', label: '14 dias' },
                 { id: 'month', label: 'Mensal' },
@@ -245,6 +246,7 @@ export default function HomeDashboard() {
         <div className="md:hidden flex overflow-x-auto gap-2 mb-6 pb-2 no-scrollbar scrollbar-hide">
           {[
             { id: 'today', label: 'Hoje' },
+            { id: 'yesterday', label: 'Ontem' },
             { id: '7days', label: '7 dias' },
             { id: '14days', label: '14 dias' },
             { id: 'month', label: 'Mensal' },

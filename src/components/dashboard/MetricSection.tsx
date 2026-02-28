@@ -107,10 +107,33 @@ export const MetricSection: React.FC<MetricSectionProps> = ({ stats, darkMode })
             </Card>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <MetricCard title="Receita Total" value={stats.totalIncome} trend="+12.5%" icon={ArrowUpCircle} color="green" />
-                <MetricCard title="Despesas Geras" value={stats.totalExpense} trend="-2.4%" icon={ArrowDownCircle} color="red" />
-                <MetricCard title="Comissões" value={stats.totalCommissions} icon={Scissors} color="blue" />
-                <MetricCard title="Lucro Líquido" value={stats.netProfit} trend="+18.2%" icon={TrendingUp} color="amber" />
+                <MetricCard
+                    title="Receita Bruta"
+                    value={stats.totalIncome}
+                    trend={stats.comparison?.incomeTrend}
+                    icon={ArrowUpCircle}
+                    color="green"
+                />
+                <MetricCard
+                    title="Despesas Totais"
+                    value={stats.totalExpense}
+                    trend={stats.comparison?.expenseTrend}
+                    icon={ArrowDownCircle}
+                    color="red"
+                />
+                <MetricCard
+                    title="Comissões"
+                    value={stats.totalCommissions}
+                    icon={Scissors}
+                    color="blue"
+                />
+                <MetricCard
+                    title="Lucro Líquido"
+                    value={stats.netProfit}
+                    trend={stats.comparison?.profitTrend}
+                    icon={TrendingUp}
+                    color="amber"
+                />
             </div>
         </div>
     );
