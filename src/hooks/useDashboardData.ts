@@ -144,10 +144,9 @@ export function useDashboardData() {
         setTransactions(prev => prev.filter(t => t.id !== id));
     };
 
-    const handleAddAccount = (acc: Omit<Account, 'id'>) => {
+    const handleAddAccount = (acc: Omit<Account, 'id'>, recurrenceMonths?: number) => {
         if (acc.variableType === 'recorrente') {
-            const countStr = window.prompt("Quantos meses de recorrência?", "3");
-            const count = parseInt(countStr || "1");
+            const count = recurrenceMonths || 1;
             const newAccounts: Account[] = [];
             const [month, year] = acc.referenceMonth.split('/').map(Number);
 

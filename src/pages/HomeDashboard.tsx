@@ -160,11 +160,6 @@ export default function HomeDashboard() {
             </button>
           ))}
         </nav>
-        <div className="p-4 mt-auto border-t border-white/5">
-          <button onClick={() => setActiveTab('configuracao')} className={cn("w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all", activeTab === 'configuracao' ? "bg-[#00d26a] text-white shadow-lg" : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5")}>
-            <Settings size={18} /> <span className="text-sm">Configurações</span>
-          </button>
-        </div>
       </aside>
 
       {/* Mobile Overlay */}
@@ -249,7 +244,7 @@ export default function HomeDashboard() {
           onClose={() => { setShowAccountModal(false); setEditingAccount(null); }}
           onSubmit={editingAccount ? (acc) => handleUpdateAccount(editingAccount.id, acc) : handleAddAccount}
           darkMode={darkMode}
-          activeTab="fixas" // Default for now
+          activeTab={accountsTab}
           editingAccount={editingAccount}
         />
         <ClosingModal

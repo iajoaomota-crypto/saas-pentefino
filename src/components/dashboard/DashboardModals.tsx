@@ -190,7 +190,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 interface AccountModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSubmit: (acc: Omit<Account, 'id'>) => void;
+    onSubmit: (acc: Omit<Account, 'id'>, recurrenceMonths?: number) => void;
     darkMode: boolean;
     activeTab: 'fixas' | 'variaveis';
     editingAccount?: Account | null;
@@ -226,6 +226,9 @@ export const AccountModal: React.FC<AccountModalProps> = ({
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        const recurrenceMonthsEl = document.getElementById('recurrenceMonths') as HTMLInputElement;
+        const recurrenceMonths = recurrenceMonthsEl ? parseInt(recurrenceMonthsEl.value) : undefined;
+
         onSubmit({
             name,
             category,
@@ -236,7 +239,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
             variableType: activeTab === 'variaveis' ? variableType : undefined,
             referenceMonth,
             synced: false
-        });
+        }, recurrenceMonths);
         onClose();
     };
 
@@ -274,16 +277,29 @@ export const AccountModal: React.FC<AccountModalProps> = ({
                     </div>
                 </div>
                 {activeTab === 'variaveis' && (
-                    <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Tipo de recorrência</label>
-                        <select
-                            value={variableType}
-                            onChange={(e) => setVariableType(e.target.value as any)}
-                            className={cn("w-full p-3 border rounded-xl text-sm outline-none", darkMode ? "bg-[#0f172a] border-white/10 text-white" : "bg-gray-50 border-gray-200")}
-                        >
-                            <option value="unica">Única (Este mês)</option>
-                            <option value="recorrente">Recorrente (Parcelado)</option>
-                        </select>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Tipo de recorrência</label>
+                            <select
+                                value={variableType}
+                                onChange={(e) => setVariableType(e.target.value as any)}
+                                className={cn("w-full p-3 border rounded-xl text-sm outline-none", darkMode ? "bg-[#0f172a] border-white/10 text-white" : "bg-gray-50 border-gray-200")}
+                            >
+                                <option value="unica">Única</option>
+                                <option value="recorrente">Recorrente</option>
+                            </select>
+                        </div>
+                        {variableType === 'recorrente' && (
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Qtd. de Meses</label>
+                                <input
+                                    type="number" min="1" max="24"
+                                    id="recurrenceMonths"
+                                    className={cn("w-full p-3 border rounded-xl text-sm outline-none", darkMode ? "bg-[#0f172a] border-white/10 text-white" : "bg-gray-50 border-gray-200")}
+                                    defaultValue="3"
+                                />
+                            </div>
+                        )}
                     </div>
                 )}
                 <div>
