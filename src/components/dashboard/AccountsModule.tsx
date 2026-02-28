@@ -2,7 +2,7 @@ import React from 'react';
 import { Plus, CheckCircle2, Clock, Trash2, Pencil } from 'lucide-react';
 import { Card, Button } from '../ui';
 import { cn } from '../../utils';
-import { formatCurrency } from '../../utils/financialUtils';
+import { formatCurrency, sumAmounts } from '../../utils/financialUtils';
 import { Account } from '../../types';
 
 interface AccountsModuleProps {
@@ -28,10 +28,10 @@ export const AccountsModule: React.FC<AccountsModuleProps> = ({
 
     const pendingCount = filteredAccounts.filter(a => a.status === 'pending').length;
     const paidCount = filteredAccounts.filter(a => a.status === 'paid').length;
-    const catTotal = filteredAccounts.reduce((sum, a) => sum + a.amount, 0);
+    const catTotal = sumAmounts(filteredAccounts.map(a => a.amount));
 
     const allPending = accounts.filter(a => a.status === 'pending');
-    const totalPendingAll = allPending.reduce((sum, a) => sum + a.amount, 0);
+    const totalPendingAll = sumAmounts(allPending.map(a => a.amount));
 
     return (
         <div className="space-y-6">
