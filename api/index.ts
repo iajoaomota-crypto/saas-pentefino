@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import db, { initDB } from './db';
+import db, { initDB } from '../server/db';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
