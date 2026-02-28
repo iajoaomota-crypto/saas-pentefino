@@ -4,11 +4,14 @@ import bcrypt from 'bcryptjs';
 const { Pool } = pg;
 
 // Connection string from environment variable or default
-const connectionString = process.env.DATABASE_URL || 'postgres://postgres:87e821b1d9d4b752471f@saas_backend_postgres:5432/saas_backend?sslmode=disable';
+const connectionString =
+  process.env.POSTGRES_URL ||
+  process.env.DATABASE_URL ||
+  'postgres://postgres:87e821b1d9d4b752471f@saas_backend_postgres:5432/saas_backend?sslmode=disable';
 
 const pool = new Pool({
   connectionString,
-  ssl: connectionString.includes('sslmode=disable') ? false : { rejectUnauthorized: false }
+  ssl: (connectionString.includes('sslmode=disable') || !connectionString.includes('vercel-storage.com')) ? false : { rejectUnauthorized: false }
 });
 
 // Initialize database tables
