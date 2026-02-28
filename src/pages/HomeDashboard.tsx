@@ -141,9 +141,17 @@ export default function HomeDashboard() {
         isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
         darkMode ? "bg-[#1E1E1E] text-white border-r border-white/5" : "bg-white text-gray-900 border-r border-gray-100 shadow-xl"
       )}>
-        <div className="p-6 flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-[#00d26a] rounded-lg flex items-center justify-center text-white"><Scissors size={24} /></div>
-          <div><span className="text-sm font-bold">Pente Fino</span></div>
+        <div className="p-6 flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-[#00d26a] rounded-lg flex items-center justify-center text-white"><Scissors size={24} /></div>
+            <div><span className="text-sm font-bold text-gray-800 dark:text-white">Pente Fino</span></div>
+          </div>
+          <button
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="md:hidden p-2 text-gray-400 hover:text-gray-600 dark:hover:text-white"
+          >
+            <X size={24} />
+          </button>
         </div>
         <nav className="px-4 flex-1 space-y-1">
           {sidebarItems.map((item) => (
@@ -159,12 +167,33 @@ export default function HomeDashboard() {
         </div>
       </aside>
 
+      {/* Mobile Overlay */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
+          />
+        )}
+      </AnimatePresence>
+
       <main className="flex-1 p-4 md:p-8 lg:p-12 overflow-x-hidden">
         <header className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-2xl font-bold">{sidebarItems.find(i => i.id === activeTab)?.label}</h1>
-            <div className="flex items-center gap-2 text-xs text-gray-400 mt-1">
-              {isOnline ? <><Wifi size={12} className="text-green-500" /> Online</> : <><WifiOff size={12} className="text-red-500" /> Offline</>}
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="md:hidden p-2 bg-white dark:bg-[#1E1E1E] rounded-xl shadow-sm text-gray-600 dark:text-gray-400"
+            >
+              <Menu size={24} />
+            </button>
+            <div>
+              <h1 className="text-2xl font-bold">{sidebarItems.find(i => i.id === activeTab)?.label}</h1>
+              <div className="flex items-center gap-2 text-xs text-gray-400 mt-1">
+                {isOnline ? <><Wifi size={12} className="text-green-500" /> Online</> : <><WifiOff size={12} className="text-red-500" /> Offline</>}
+              </div>
             </div>
           </div>
           <div className="flex gap-4">
