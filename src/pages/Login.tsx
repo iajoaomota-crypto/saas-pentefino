@@ -95,8 +95,8 @@ export default function Login() {
                     animate={{ opacity: 1, y: 0 }}
                     className="text-center"
                 >
-                    <div className="mx-auto h-24 w-24 flex items-center justify-center overflow-hidden">
-                        <img src="/logo.png" alt="Logo Pente Fino" className="w-full h-full object-contain" />
+                    <div className="mx-auto h-24 w-24 bg-white dark:bg-white/10 rounded-3xl flex items-center justify-center shadow-xl border border-gray-100 dark:border-white/10 overflow-hidden transition-all hover:scale-105">
+                        <img src="/logo.png" alt="Logo Pente Fino" className="w-full h-full object-contain p-3" />
                     </div>
                     <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
                         {isRegister ? 'Criar Nova Conta' : 'Acesso ao Sistema'}
