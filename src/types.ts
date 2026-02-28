@@ -5,21 +5,24 @@ export interface Transaction {
     date: string;
     amount: number;
     type: 'income' | 'expense';
-    expenseType?: 'professional' | 'personal';
+    expenseType?: 'Empresa' | 'Pessoal';
     revenueType?: 'services' | 'products' | 'courses' | 'other';
     barber?: string;
+    synced?: boolean;
 }
 
 export interface Closing {
-    id: string;
+    id: string | number;
     date: string;
-    user_id: string;
+    user_id: string | number;
     total_amount: number;
     status: 'open' | 'closed';
     notes: string;
-    created_at: string;
-    updated_at: string;
+    synced?: boolean;
+    created_at?: string;
+    updated_at?: string;
 }
+
 export interface Account {
     id: number | string;
     name: string;
@@ -31,4 +34,5 @@ export interface Account {
     variableType?: 'unica' | 'recorrente';
     referenceMonth: string;
     paidAt?: string;
+    synced?: boolean;
 }

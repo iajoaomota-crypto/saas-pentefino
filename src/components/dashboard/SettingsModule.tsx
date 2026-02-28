@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, Button } from '../ui';
-import { Shield, Database, Moon, Sun, Trash2, Smartphone, Download, Upload, Percent } from 'lucide-react';
+import { Shield, Database, Moon, Sun, Trash2, Smartphone, Download, Upload, Percent, User, Mail } from 'lucide-react';
 
 interface SettingsModuleProps {
     darkMode: boolean;
@@ -12,6 +12,15 @@ interface SettingsModuleProps {
 export const SettingsModule: React.FC<SettingsModuleProps> = ({
     darkMode, setDarkMode, commissionRate, setCommissionRate
 }) => {
+    const [userName, setUserName] = useState(localStorage.getItem('pentefino_user_name') || 'Usuário');
+    const [userEmail, setUserEmail] = useState(localStorage.getItem('pentefino_user_email') || 'usuario@email.com');
+
+    const handleSaveProfile = () => {
+        localStorage.setItem('pentefino_user_name', userName);
+        localStorage.setItem('pentefino_user_email', userEmail);
+        alert("Perfil atualizado localmente!");
+    };
+
     const handleClearLocalStorage = () => {
         if (window.confirm("Isso apagará todos os seus lançamentos e contas locais. Tem certeza?")) {
             localStorage.removeItem('pentefino_data');
@@ -26,7 +35,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
             transactions: localStorage.getItem('pentefino_data'),
             accounts: localStorage.getItem('pentefino_accounts'),
             closings: localStorage.getItem('pentefino_closings'),
-            settings: { commissionRate, darkMode }
+            settings: { commissionRate, darkMode, userName, userEmail }
         };
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
@@ -48,6 +57,8 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
                 if (data.accounts) localStorage.setItem('pentefino_accounts', data.accounts);
                 if (data.closings) localStorage.setItem('pentefino_closings', data.closings);
                 if (data.settings?.commissionRate) setCommissionRate(data.settings.commissionRate);
+                if (data.settings?.userName) localStorage.setItem('pentefino_user_name', data.settings.userName);
+                if (data.settings?.userEmail) localStorage.setItem('pentefino_user_email', data.settings.userEmail);
                 alert("Backup restaurado com sucesso! Recarregando...");
                 window.location.reload();
             } catch (err) {
@@ -60,6 +71,42 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
     return (
         <div className="space-y-6 max-w-4xl mx-auto pb-12">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Profile Section */}
+                <Card className="p-6 bg-white dark:bg-[#1E1E1E] border-none shadow-sm md:col-span-2">
+                    <div className="flex items-center gap-4 mb-6">
+                        <div className="p-3 bg-[#00d26a]/10 rounded-2xl text-[#00d26a]">
+                            <User size={24} />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-gray-800 dark:text-white">Meu Perfil</h3>
+                            <p className="text-xs text-gray-400">Gerencie suas informações de acesso</p>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Nome Completo</label>
+                            <div className="relative">
+                                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                <input
+                                    type="text" value={userName} onChange={(e) => setUserName(e.target.value)}
+                                    className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#00d26a]/20"
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">E-mail</label>
+                            <div className="relative">
+                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                <input
+                                    type="email" value={userEmail} onChange={(e) => setUserEmail(e.target.value)}
+                                    className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#00d26a]/20"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <Button onClick={handleSaveProfile} className="w-full md:w-auto px-8 bg-[#00d26a] hover:bg-[#00b85c] text-white">Salvar Perfil</Button>
+                </Card>
+
                 <Card className="p-6 bg-white dark:bg-[#1E1E1E] border-none shadow-sm">
                     <div className="flex items-center gap-4 mb-6">
                         <div className="p-3 bg-blue-500/10 rounded-2xl text-blue-500">
@@ -152,7 +199,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-gray-500">Versão</span>
-                            <span className="text-gray-400">1.0.8-stable</span>
+                            <span className="text-gray-400">1.0.9-stable</span>
                         </div>
                         <div className="pt-4 border-t border-gray-100 dark:border-white/5 text-[10px] text-gray-400 text-center">
                             Pente Fino SaaS v1.0 <br /> Desenvolvido para Gestão de Barbearias

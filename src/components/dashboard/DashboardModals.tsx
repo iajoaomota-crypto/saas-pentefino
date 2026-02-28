@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Button } from '../ui';
 import { cn } from '../../utils';
 import { Transaction, Account, Closing } from '../../types';
-import { REVENUE_CATEGORIES, EXPENSE_CATEGORIES, PAYMENT_METHODS } from '../../constants/config';
+import { PAYMENT_METHODS } from '../../constants/config';
 
 interface TransactionModalProps {
     isOpen: boolean;
@@ -18,10 +18,10 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     const [desc, setDesc] = useState('');
     const [amount, setAmount] = useState('');
     const [type, setType] = useState<'income' | 'expense'>('income');
-    const [category, setCategory] = useState('Serviços');
+    const [category, setCategory] = useState('PIX');
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [revenueType, setRevenueType] = useState<'services' | 'products' | 'courses' | 'other'>('services');
-    const [expenseType, setExpenseType] = useState<'professional' | 'personal'>('professional');
+    const [expenseType, setExpenseType] = useState<'Empresa' | 'Pessoal'>('Empresa');
     const [barber, setBarber] = useState('');
 
     useEffect(() => {
@@ -32,16 +32,16 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
             setCategory(editingTransaction.category);
             setDate(editingTransaction.date.split('/').reverse().join('-'));
             setRevenueType(editingTransaction.revenueType || 'services');
-            setExpenseType(editingTransaction.expenseType || 'professional');
+            setExpenseType(editingTransaction.expenseType || 'Empresa');
             setBarber(editingTransaction.barber || '');
         } else {
             setDesc('');
             setAmount('');
             setType('income');
-            setCategory('Serviços');
+            setCategory('PIX');
             setDate(new Date().toISOString().split('T')[0]);
             setRevenueType('services');
-            setExpenseType('professional');
+            setExpenseType('Empresa');
             setBarber('');
         }
     }, [editingTransaction, isOpen]);
@@ -56,7 +56,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
             date: date.split('-').reverse().join('/'),
             revenueType: type === 'income' ? revenueType : undefined,
             expenseType: type === 'expense' ? expenseType : undefined,
-            barber: type === 'income' ? barber : undefined
+            barber: type === 'income' ? barber : undefined,
+            synced: false
         });
         onClose();
     };
@@ -137,8 +138,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                             onChange={(e) => setExpenseType(e.target.value as any)}
                             className={cn("w-full p-3 border rounded-xl text-sm outline-none", darkMode ? "bg-[#0f172a] border-white/10 text-white" : "bg-gray-50 border-gray-200")}
                         >
-                            <option value="professional">Profissional (Empresa)</option>
-                            <option value="personal">Pessoal (Sócio)</option>
+                            <option value="Empresa">Empresa</option>
+                            <option value="Pessoal">Pessoal</option>
                         </select>
                     </div>
                 )}
@@ -199,7 +200,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
     isOpen, onClose, onSubmit, darkMode, activeTab, editingAccount
 }) => {
     const [name, setName] = useState('');
-    const [category, setCategory] = useState('Aluguel');
+    const [category, setCategory] = useState('Outras');
     const [amount, setAmount] = useState('');
     const [dueDate, setDueDate] = useState('15');
     const [variableType, setVariableType] = useState<'unica' | 'recorrente'>('unica');
@@ -215,13 +216,13 @@ export const AccountModal: React.FC<AccountModalProps> = ({
             setReferenceMonth(editingAccount.referenceMonth);
         } else {
             setName('');
-            setCategory('Aluguel');
+            setCategory('Outras');
             setAmount('');
             setDueDate('15');
             setVariableType('unica');
             setReferenceMonth(`${new Date().getMonth() + 1}/${new Date().getFullYear()}`);
         }
-    }, [editingAccount, isOpen]);
+    }, [editingAccount, isOpen, activeTab]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -233,7 +234,8 @@ export const AccountModal: React.FC<AccountModalProps> = ({
             status: editingAccount?.status || 'pending',
             type: activeTab,
             variableType: activeTab === 'variaveis' ? variableType : undefined,
-            referenceMonth
+            referenceMonth,
+            synced: false
         });
         onClose();
     };
@@ -331,7 +333,8 @@ export const ClosingModal: React.FC<ClosingModalProps> = ({
             total_amount: parseFloat(amount),
             status: editingClosing?.status || 'closed',
             notes,
-            user_id: '1' // Default user
+            user_id: '1',
+            synced: false
         });
         onClose();
     };

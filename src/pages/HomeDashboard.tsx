@@ -10,6 +10,7 @@ import { MetricSection } from '../components/dashboard/MetricSection';
 import { TransactionsModule } from '../components/dashboard/TransactionsModule';
 import { AccountsModule } from '../components/dashboard/AccountsModule';
 import { DashboardCharts } from '../components/dashboard/DashboardCharts';
+import { Card, Button, Modal } from '../components/ui';
 import { TransactionModal, AccountModal, ClosingModal } from '../components/dashboard/DashboardModals';
 import { SettingsModule } from '../components/dashboard/SettingsModule';
 import { ReportsModule } from '../components/dashboard/ReportsModule';
@@ -23,7 +24,8 @@ export default function HomeDashboard() {
     commissionRate, setCommissionRate,
     filteredTransactions, stats,
     handleAddTransaction, handleUpdateTransaction, handleDeleteTransaction,
-    handleAddAccount, handleUpdateAccount, handleDeleteAccount, handleToggleAccountStatus
+    handleAddAccount, handleUpdateAccount, handleDeleteAccount, handleToggleAccountStatus,
+    handleAddClosing
   } = useDashboardData();
 
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -92,6 +94,30 @@ export default function HomeDashboard() {
             onToggleStatus={handleToggleAccountStatus}
           />
         );
+      case 'fechamentos':
+        return (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-bold dark:text-white">Histórico de Fechamentos</h2>
+              <Button onClick={() => setShowClosingModal(true)} className="bg-[#00d26a] hover:bg-[#00b85c] text-white gap-2">
+                <Plus size={18} /> Novo Fechamento
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {closings.map(c => (
+                <Card key={c.id} className="p-4 bg-white dark:bg-[#1E1E1E]">
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="text-xs text-gray-400 font-bold">{c.date}</span>
+                    <span className="text-xs bg-[#00d26a]/10 text-[#00d26a] px-2 py-0.5 rounded-full font-bold">FECHADO</span>
+                  </div>
+                  <div className="text-lg font-bold mb-1">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(c.total_amount)}</div>
+                  <p className="text-xs text-gray-500 line-clamp-2">{c.notes || 'Sem observações'}</p>
+                </Card>
+              ))}
+              {closings.length === 0 && <div className="col-span-full py-12 text-center text-gray-400 italic">Nenhum fechamento registrado.</div>}
+            </div>
+          </div>
+        );
       case 'relatorios':
         return <ReportsModule stats={stats} transactions={transactions} />;
       case 'configuracao':
@@ -142,9 +168,42 @@ export default function HomeDashboard() {
             </div>
           </div>
           <div className="flex gap-4">
+            <div className="hidden md:flex bg-gray-100 dark:bg-white/5 p-1 rounded-xl">
+              {[
+                { id: 'today', label: 'Hoje' },
+                { id: '7days', label: '7 dias' },
+                { id: '14days', label: '14 dias' },
+                { id: 'month', label: 'Mensal' },
+                { id: 'custom', label: 'Per.' },
+              ].map(f => (
+                <button
+                  key={f.id}
+                  onClick={() => setDateFilter(f.id)}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg text-xs font-bold transition-all",
+                    dateFilter === f.id ? "bg-white dark:bg-[#2A2A2A] text-[#00d26a] shadow-sm" : "text-gray-400 hover:text-gray-600 dark:hover:text-white"
+                  )}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
             <button onClick={() => setShowAddModal(true)} className="bg-[#00d26a] text-white px-4 py-2 rounded-xl font-bold text-sm shadow-lg flex items-center gap-2 hover:scale-105 transition-transform"><Plus size={18} /> Novo Lançamento</button>
           </div>
         </header>
+
+        {dateFilter === 'custom' && (
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 flex gap-4 items-center bg-gray-50 dark:bg-white/5 p-4 rounded-2xl">
+            <div className="flex flex-col">
+              <label className="text-[10px] font-bold text-gray-400 uppercase mb-1">Início</label>
+              <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="bg-transparent text-sm font-bold border-none outline-none" />
+            </div>
+            <div className="flex flex-col">
+              <label className="text-[10px] font-bold text-gray-400 uppercase mb-1">Fim</label>
+              <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="bg-transparent text-sm font-bold border-none outline-none" />
+            </div>
+          </motion.div>
+        )}
 
         {renderContent()}
 
@@ -163,6 +222,13 @@ export default function HomeDashboard() {
           darkMode={darkMode}
           activeTab="fixas" // Default for now
           editingAccount={editingAccount}
+        />
+        <ClosingModal
+          isOpen={showClosingModal}
+          onClose={() => { setShowClosingModal(false); setEditingClosing(null); }}
+          onSubmit={editingClosing ? (c) => { } : handleAddClosing}
+          darkMode={darkMode}
+          editingClosing={editingClosing}
         />
       </main>
     </div>
