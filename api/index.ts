@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import db, { initDB } from './db';
+import db, { initDB } from '../server/db';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -318,13 +318,7 @@ app.post('/api/webhooks/payment', async (req, res) => {
     }
 });
 
-// Serve static files from the React app
-const distPath = path.join(__dirname, '../dist');
-app.use(express.static(distPath));
-
-app.get('*', (req, res) => {
-    res.sendFile(path.join(distPath, 'index.html'));
-});
+// Serve static files managed by Vercel
 
 const PORT = process.env.PORT || 3001;
 
