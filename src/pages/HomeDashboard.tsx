@@ -11,6 +11,8 @@ import { TransactionsModule } from '../components/dashboard/TransactionsModule';
 import { AccountsModule } from '../components/dashboard/AccountsModule';
 import { DashboardCharts } from '../components/dashboard/DashboardCharts';
 import { TransactionModal, AccountModal, ClosingModal } from '../components/dashboard/DashboardModals';
+import { SettingsModule } from '../components/dashboard/SettingsModule';
+import { ReportsModule } from '../components/dashboard/ReportsModule';
 
 export default function HomeDashboard() {
   const navigate = useNavigate();
@@ -18,6 +20,7 @@ export default function HomeDashboard() {
     transactions, accounts, closings, isOnline,
     dateFilter, setDateFilter, startDate, setStartDate, endDate, setEndDate,
     searchTerm, setSearchTerm, subTab, setSubTab, accountsTab, setAccountsTab,
+    commissionRate, setCommissionRate,
     filteredTransactions, stats,
     handleAddTransaction, handleUpdateTransaction, handleDeleteTransaction,
     handleAddAccount, handleUpdateAccount, handleDeleteAccount, handleToggleAccountStatus
@@ -42,6 +45,7 @@ export default function HomeDashboard() {
     { id: 'fechamentos', label: 'Fechamentos', icon: Calendar },
     { id: 'relatorios', label: 'Relatórios', icon: BarChart3 },
     { id: 'analise', label: 'Análise', icon: FileText },
+    { id: 'configuracao', label: 'Configurações', icon: Settings },
   ];
 
   const renderContent = () => {
@@ -88,6 +92,15 @@ export default function HomeDashboard() {
             onToggleStatus={handleToggleAccountStatus}
           />
         );
+      case 'relatorios':
+        return <ReportsModule stats={stats} transactions={transactions} />;
+      case 'configuracao':
+        return <SettingsModule
+          darkMode={darkMode}
+          setDarkMode={setDarkMode}
+          commissionRate={commissionRate}
+          setCommissionRate={setCommissionRate}
+        />;
       default:
         return <div className="p-20 text-center text-gray-400">Em desenvolvimento...</div>;
     }
@@ -114,7 +127,7 @@ export default function HomeDashboard() {
           ))}
         </nav>
         <div className="p-4 mt-auto border-t border-white/5">
-          <button onClick={() => setDarkMode(!darkMode)} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5">
+          <button onClick={() => setActiveTab('configuracao')} className={cn("w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all", activeTab === 'configuracao' ? "bg-[#00d26a] text-white shadow-lg" : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5")}>
             <Settings size={18} /> <span className="text-sm">Configurações</span>
           </button>
         </div>

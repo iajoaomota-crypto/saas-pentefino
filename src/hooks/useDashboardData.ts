@@ -15,6 +15,7 @@ export function useDashboardData() {
     const [searchTerm, setSearchTerm] = useState('');
     const [subTab, setSubTab] = useState('services');
     const [accountsTab, setAccountsTab] = useState<'fixas' | 'variaveis'>('fixas');
+    const [commissionRate, setCommissionRate] = useState(50); // Default 50%
 
     // Initial Load
     useEffect(() => {
@@ -79,15 +80,23 @@ export function useDashboardData() {
 
         const totalIncome = sumAmounts(incomeTransactions.map(t => t.amount));
         const totalExpense = sumAmounts(expenseTransactions.map(t => t.amount));
+
+        // Calculate commissions only on service income
+        const serviceIncome = sumAmounts(incomeTransactions.filter(t => t.revenueType === 'services').map(t => t.amount));
+        const totalCommissions = (serviceIncome * commissionRate) / 100;
+
         const balance = fromCents(toCents(totalIncome) - toCents(totalExpense));
+        const netProfit = fromCents(toCents(balance) - toCents(totalCommissions));
 
         return {
             totalIncome,
             totalExpense,
+            totalCommissions,
             balance,
+            netProfit,
             transactionCount: filteredTransactions.length
         };
-    }, [filteredTransactions]);
+    }, [filteredTransactions, commissionRate]);
 
     const handleAddTransaction = (t: Omit<Transaction, 'id'>) => {
         const newTransaction = { ...t, id: Date.now() };
@@ -103,8 +112,26 @@ export function useDashboardData() {
     };
 
     const handleAddAccount = (acc: Omit<Account, 'id'>) => {
-        const newAccount = { ...acc, id: Date.now() };
-        setAccounts(prev => [newAccount, ...prev]);
+        if (acc.variableType === 'recorrente') {
+            const count = parseInt(window.prompt("Quantos meses de recorrência?", "3") || "1");
+            const newAccounts: Account[] = [];
+            for (let i = 0; i < count; i++) {
+                const [month, year] = acc.referenceMonth.split('/').map(Number);
+                const newDate = new Date(year, month - 1 + i, 1);
+                const newMonthStr = `${newDate.getMonth() + 1}/${newDate.getFullYear()}`;
+
+                newAccounts.push({
+                    ...acc,
+                    id: Date.now() + i,
+                    name: `${acc.name} (${i + 1}/${count})`,
+                    referenceMonth: newMonthStr
+                });
+            }
+            setAccounts(prev => [...newAccounts, ...prev]);
+        } else {
+            const newAccount = { ...acc, id: Date.now() };
+            setAccounts(prev => [newAccount, ...prev]);
+        }
     };
 
     const handleUpdateAccount = (id: string | number, acc: Partial<Account>) => {
@@ -141,6 +168,8 @@ export function useDashboardData() {
         setSubTab,
         accountsTab,
         setAccountsTab,
+        commissionRate,
+        setCommissionRate,
         filteredTransactions,
         stats,
         handleAddTransaction,

@@ -1,5 +1,5 @@
 import React from 'react';
-import { DollarSign, TrendingUp, TrendingDown, Wallet, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { DollarSign, TrendingUp, TrendingDown, Wallet, ArrowUpRight, ArrowDownRight, Scissors } from 'lucide-react';
 import { Card } from '../ui';
 import { cn } from '../../utils';
 import { formatCurrency } from '../../utils/financialUtils';
@@ -99,10 +99,11 @@ export const MetricSection: React.FC<MetricSectionProps> = ({ stats, darkMode })
                 </div>
             </Card>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <MetricCard title="Receita Bruta" value={stats.totalIncome} trend="+12.5%" icon={DollarSign} color="green" />
-                <MetricCard title="Despesas Totais" value={stats.totalExpense} trend="-2.4%" icon={TrendingDown} color="red" />
-                <MetricCard title="Lucro Líquido" value={stats.balance} trend="+18.2%" icon={TrendingUp} color="blue" />
+                <MetricCard title="Despesas" value={stats.totalExpense} trend="-2.4%" icon={TrendingDown} color="red" />
+                <MetricCard title="Comissões" value={stats.totalCommissions} trend="0%" icon={Scissors} color="blue" />
+                <MetricCard title="Lucro Líquido" value={stats.netProfit} trend="+18.2%" icon={TrendingUp} color="green" />
             </div>
         </div>
     );

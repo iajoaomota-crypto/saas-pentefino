@@ -121,11 +121,19 @@ export const TransactionsModule: React.FC<TransactionsModuleProps> = ({
                                                 )}>
                                                     {isIncome ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
                                                 </div>
-                                                <span className="font-semibold text-gray-700 dark:text-gray-200">{t.desc}</span>
+                                                <div className="flex flex-col">
+                                                    <span className="font-semibold text-gray-700 dark:text-gray-200">{t.desc}</span>
+                                                    {t.barber && <span className="text-[10px] text-gray-400 font-medium">{t.barber}</span>}
+                                                </div>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className="text-sm text-gray-500 dark:text-gray-400">{t.category}</span>
+                                            <div className="flex flex-col">
+                                                <span className="text-sm text-gray-500 dark:text-gray-400">{t.category}</span>
+                                                <span className="text-[10px] text-gray-400 uppercase font-bold">
+                                                    {isIncome ? t.revenueType : t.expenseType}
+                                                </span>
+                                            </div>
                                         </td>
                                         <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{t.date}</td>
                                         <td className="px-6 py-4">

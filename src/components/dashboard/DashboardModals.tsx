@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown } from 'lucide-react';
 import { Modal, Button } from '../ui';
 import { cn } from '../../utils';
 import { Transaction, Account, Closing } from '../../types';
-import { REVENUE_CATEGORIES, ACCOUNT_CATEGORIES } from '../../constants/config';
+import { REVENUE_CATEGORIES, EXPENSE_CATEGORIES, PAYMENT_METHODS } from '../../constants/config';
 
 interface TransactionModalProps {
     isOpen: boolean;
@@ -19,8 +18,11 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     const [desc, setDesc] = useState('');
     const [amount, setAmount] = useState('');
     const [type, setType] = useState<'income' | 'expense'>('income');
-    const [category, setCategory] = useState('Corte');
+    const [category, setCategory] = useState('Serviços');
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+    const [revenueType, setRevenueType] = useState<'services' | 'products' | 'courses' | 'other'>('services');
+    const [expenseType, setExpenseType] = useState<'professional' | 'personal'>('professional');
+    const [barber, setBarber] = useState('');
 
     useEffect(() => {
         if (editingTransaction) {
@@ -29,12 +31,18 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
             setType(editingTransaction.type);
             setCategory(editingTransaction.category);
             setDate(editingTransaction.date.split('/').reverse().join('-'));
+            setRevenueType(editingTransaction.revenueType || 'services');
+            setExpenseType(editingTransaction.expenseType || 'professional');
+            setBarber(editingTransaction.barber || '');
         } else {
             setDesc('');
             setAmount('');
             setType('income');
-            setCategory('Corte');
+            setCategory('Serviços');
             setDate(new Date().toISOString().split('T')[0]);
+            setRevenueType('services');
+            setExpenseType('professional');
+            setBarber('');
         }
     }, [editingTransaction, isOpen]);
 
@@ -45,7 +53,10 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
             amount: parseFloat(amount),
             type,
             category,
-            date: date.split('-').reverse().join('/')
+            date: date.split('-').reverse().join('/'),
+            revenueType: type === 'income' ? revenueType : undefined,
+            expenseType: type === 'expense' ? expenseType : undefined,
+            barber: type === 'income' ? barber : undefined
         });
         onClose();
     };
@@ -90,16 +101,55 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                     </div>
                 </div>
 
+                {type === 'income' && (
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Tipo de Receita</label>
+                            <select
+                                value={revenueType}
+                                onChange={(e) => setRevenueType(e.target.value as any)}
+                                className={cn("w-full p-3 border rounded-xl text-sm outline-none", darkMode ? "bg-[#0f172a] border-white/10 text-white" : "bg-gray-50 border-gray-200")}
+                            >
+                                <option value="services">Serviços</option>
+                                <option value="products">Produtos</option>
+                                <option value="courses">Cursos</option>
+                                <option value="other">Outros</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Barbeiro / Atendente</label>
+                            <input
+                                type="text"
+                                value={barber}
+                                onChange={(e) => setBarber(e.target.value)}
+                                placeholder="Nome do profissional"
+                                className={cn("w-full p-3 border rounded-xl text-sm outline-none", darkMode ? "bg-[#0f172a] border-white/10 text-white" : "bg-gray-50 border-gray-200")}
+                            />
+                        </div>
+                    </div>
+                )}
+
+                {type === 'expense' && (
+                    <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Tipo de Despesa</label>
+                        <select
+                            value={expenseType}
+                            onChange={(e) => setExpenseType(e.target.value as any)}
+                            className={cn("w-full p-3 border rounded-xl text-sm outline-none", darkMode ? "bg-[#0f172a] border-white/10 text-white" : "bg-gray-50 border-gray-200")}
+                        >
+                            <option value="professional">Profissional (Empresa)</option>
+                            <option value="personal">Pessoal (Sócio)</option>
+                        </select>
+                    </div>
+                )}
+
                 <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Descrição</label>
                     <input
                         type="text"
                         value={desc}
                         onChange={(e) => setDesc(e.target.value)}
-                        className={cn(
-                            "w-full p-3 border rounded-xl text-sm outline-none",
-                            darkMode ? "bg-[#0f172a] border-white/10 text-white" : "bg-gray-50 border-gray-200"
-                        )}
+                        className={cn("w-full p-3 border rounded-xl text-sm outline-none", darkMode ? "bg-[#0f172a] border-white/10 text-white" : "bg-gray-50 border-gray-200")}
                         required
                     />
                 </div>
@@ -108,30 +158,28 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                     <div>
                         <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Valor (R$)</label>
                         <input
-                            type="number"
-                            step="0.01"
-                            value={amount}
-                            onChange={(e) => setAmount(e.target.value)}
-                            className={cn(
-                                "w-full p-3 border rounded-xl text-sm outline-none",
-                                darkMode ? "bg-[#0f172a] border-white/10 text-white" : "bg-gray-50 border-gray-200"
-                            )}
-                            required
+                            type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)}
+                            className={cn("w-full p-3 border rounded-xl text-sm outline-none", darkMode ? "bg-[#0f172a] border-white/10 text-white" : "bg-gray-50 border-gray-200")} required
                         />
                     </div>
                     <div>
                         <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Data</label>
                         <input
-                            type="date"
-                            value={date}
-                            onChange={(e) => setDate(e.target.value)}
-                            className={cn(
-                                "w-full p-3 border rounded-xl text-sm outline-none",
-                                darkMode ? "bg-[#0f172a] border-white/10 text-white" : "bg-gray-50 border-gray-200"
-                            )}
-                            required
+                            type="date" value={date} onChange={(e) => setDate(e.target.value)}
+                            className={cn("w-full p-3 border rounded-xl text-sm outline-none", darkMode ? "bg-[#0f172a] border-white/10 text-white" : "bg-gray-50 border-gray-200")} required
                         />
                     </div>
+                </div>
+
+                <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Categoria / Forma de Pagto</label>
+                    <select
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        className={cn("w-full p-3 border rounded-xl text-sm outline-none", darkMode ? "bg-[#0f172a] border-white/10 text-white" : "bg-gray-50 border-gray-200")}
+                    >
+                        {PAYMENT_METHODS.map(m => <option key={m.id} value={m.label}>{m.label}</option>)}
+                    </select>
                 </div>
             </div>
         </Modal>
@@ -151,9 +199,11 @@ export const AccountModal: React.FC<AccountModalProps> = ({
     isOpen, onClose, onSubmit, darkMode, activeTab, editingAccount
 }) => {
     const [name, setName] = useState('');
-    const [category, setCategory] = useState('Outras Despesas');
+    const [category, setCategory] = useState('Aluguel');
     const [amount, setAmount] = useState('');
     const [dueDate, setDueDate] = useState('15');
+    const [variableType, setVariableType] = useState<'unica' | 'recorrente'>('unica');
+    const [referenceMonth, setReferenceMonth] = useState(`${new Date().getMonth() + 1}/${new Date().getFullYear()}`);
 
     useEffect(() => {
         if (editingAccount) {
@@ -161,11 +211,15 @@ export const AccountModal: React.FC<AccountModalProps> = ({
             setCategory(editingAccount.category);
             setAmount(editingAccount.amount.toString());
             setDueDate(editingAccount.dueDate.toString());
+            setVariableType(editingAccount.variableType || 'unica');
+            setReferenceMonth(editingAccount.referenceMonth);
         } else {
             setName('');
-            setCategory('Outras Despesas');
+            setCategory('Aluguel');
             setAmount('');
             setDueDate('15');
+            setVariableType('unica');
+            setReferenceMonth(`${new Date().getMonth() + 1}/${new Date().getFullYear()}`);
         }
     }, [editingAccount, isOpen]);
 
@@ -178,7 +232,8 @@ export const AccountModal: React.FC<AccountModalProps> = ({
             dueDate: parseInt(dueDate),
             status: editingAccount?.status || 'pending',
             type: activeTab,
-            referenceMonth: `${new Date().getMonth() + 1}/${new Date().getFullYear()}`
+            variableType: activeTab === 'variaveis' ? variableType : undefined,
+            referenceMonth
         });
         onClose();
     };
@@ -215,6 +270,27 @@ export const AccountModal: React.FC<AccountModalProps> = ({
                             className={cn("w-full p-3 border rounded-xl text-sm outline-none", darkMode ? "bg-[#0f172a] border-white/10 text-white" : "bg-gray-50 border-gray-200")} required
                         />
                     </div>
+                </div>
+                {activeTab === 'variaveis' && (
+                    <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Tipo de recorrência</label>
+                        <select
+                            value={variableType}
+                            onChange={(e) => setVariableType(e.target.value as any)}
+                            className={cn("w-full p-3 border rounded-xl text-sm outline-none", darkMode ? "bg-[#0f172a] border-white/10 text-white" : "bg-gray-50 border-gray-200")}
+                        >
+                            <option value="unica">Única (Este mês)</option>
+                            <option value="recorrente">Recorrente (Parcelado)</option>
+                        </select>
+                    </div>
+                )}
+                <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Mês de Referência</label>
+                    <input
+                        type="text" value={referenceMonth} onChange={(e) => setReferenceMonth(e.target.value)}
+                        placeholder="MM/AAAA"
+                        className={cn("w-full p-3 border rounded-xl text-sm outline-none", darkMode ? "bg-[#0f172a] border-white/10 text-white" : "bg-gray-50 border-gray-200")}
+                    />
                 </div>
             </div>
         </Modal>
