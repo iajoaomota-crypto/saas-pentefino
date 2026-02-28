@@ -3,9 +3,18 @@ import { Transaction, Account, Closing } from '../types';
 import { toCents, fromCents, sumAmounts } from '../utils/financialUtils';
 
 export function useDashboardData() {
-    const [transactions, setTransactions] = useState<Transaction[]>([]);
-    const [accounts, setAccounts] = useState<Account[]>([]);
-    const [closings, setClosings] = useState<Closing[]>([]);
+    const [transactions, setTransactions] = useState<Transaction[]>(() => {
+        const saved = localStorage.getItem('pentefino_data');
+        return saved ? JSON.parse(saved) : [];
+    });
+    const [accounts, setAccounts] = useState<Account[]>(() => {
+        const saved = localStorage.getItem('pentefino_accounts');
+        return saved ? JSON.parse(saved) : [];
+    });
+    const [closings, setClosings] = useState<Closing[]>(() => {
+        const saved = localStorage.getItem('pentefino_closings');
+        return saved ? JSON.parse(saved) : [];
+    });
     const [isOnline, setIsOnline] = useState(navigator.onLine);
 
     // Filter states

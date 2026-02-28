@@ -51,7 +51,9 @@ export default function HomeDashboard() {
     navigate('/login');
   };
 
-  if (loading) {
+  const hasData = transactions.length > 0 || accounts.length > 0;
+
+  if (loading && !hasData) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-50 dark:bg-[#121212]">
         <div className="flex flex-col items-center gap-4">
@@ -162,7 +164,7 @@ export default function HomeDashboard() {
       {/* Sidebar for Desktop / Menu for Mobile */}
       <aside className={cn(
         "fixed inset-y-0 left-0 w-64 flex flex-col h-screen overflow-y-auto transition-transform duration-300 z-[60] md:sticky md:top-0 md:translate-x-0",
-        isMobileMenuOpen ? "translate-x-0" : "-translate-x-full",
+        isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
         darkMode ? "bg-[#1E1E1E] text-white border-r border-white/5" : "bg-white text-gray-900 border-r border-gray-100 shadow-xl"
       )}>
         <div className="p-6 flex items-center justify-between mb-4">
@@ -228,6 +230,7 @@ export default function HomeDashboard() {
             <h1 className="text-2xl font-bold">{sidebarItems.find(i => i.id === activeTab)?.label}</h1>
             <div className="flex items-center gap-2 text-xs text-gray-400 mt-1">
               {isOnline ? <><Wifi size={12} className="text-green-500" /> Online</> : <><WifiOff size={12} className="text-red-500" /> Offline</>}
+              {loading && <span className="ml-2 flex items-center gap-1 text-[#00d26a] animate-pulse"><div className="w-1.5 h-1.5 bg-[#00d26a] rounded-full" /> Sincronizando...</span>}
             </div>
           </div>
           <div className="flex gap-4">
