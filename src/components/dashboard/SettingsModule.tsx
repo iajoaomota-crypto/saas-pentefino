@@ -1,24 +1,42 @@
 import React, { useState } from 'react';
 import { Card, Button } from '../ui';
-import { Shield, Database, Moon, Sun, Trash2, Smartphone, Download, Upload, Percent, User, Mail } from 'lucide-react';
+import { Shield, Database, Moon, Sun, Trash2, Smartphone, Download, Upload, Percent, User, Mail, Lock, LogOut, Eye, EyeOff } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface SettingsModuleProps {
     darkMode: boolean;
     setDarkMode: (val: boolean) => void;
     commissionRate: number;
     setCommissionRate: (val: number) => void;
+    onLogout: () => void;
 }
 
 export const SettingsModule: React.FC<SettingsModuleProps> = ({
-    darkMode, setDarkMode, commissionRate, setCommissionRate
+    darkMode, setDarkMode, commissionRate, setCommissionRate, onLogout
 }) => {
     const [userName, setUserName] = useState(localStorage.getItem('pentefino_user_name') || 'Usuário');
     const [userEmail, setUserEmail] = useState(localStorage.getItem('pentefino_user_email') || 'usuario@email.com');
+    const [showPasswordFields, setShowPasswordFields] = useState(false);
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [showPass, setShowPass] = useState(false);
 
     const handleSaveProfile = () => {
         localStorage.setItem('pentefino_user_name', userName);
         localStorage.setItem('pentefino_user_email', userEmail);
         alert("Perfil atualizado localmente!");
+    };
+
+    const handleChangePassword = () => {
+        if (!currentPassword || !newPassword) {
+            alert("Preencha todos os campos de senha.");
+            return;
+        }
+        // In a real app, this would be an API call
+        alert("Senha alterada com sucesso! (Simulação)");
+        setCurrentPassword('');
+        setNewPassword('');
+        setShowPasswordFields(false);
     };
 
     const handleClearLocalStorage = () => {
@@ -79,32 +97,77 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
                         </div>
                         <div>
                             <h3 className="font-bold text-gray-800 dark:text-white">Meu Perfil</h3>
-                            <p className="text-xs text-gray-400">Gerencie suas informações de acesso</p>
+                            <p className="text-xs text-gray-400">Informações básicas da conta</p>
                         </div>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         <div className="space-y-1">
                             <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Nome Completo</label>
-                            <div className="relative">
-                                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                                <input
-                                    type="text" value={userName} onChange={(e) => setUserName(e.target.value)}
-                                    className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#00d26a]/20"
-                                />
-                            </div>
+                            <input
+                                type="text" value={userName} onChange={(e) => setUserName(e.target.value)}
+                                className="w-full px-4 py-3 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#00d26a]/20"
+                            />
                         </div>
                         <div className="space-y-1">
-                            <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">E-mail</label>
-                            <div className="relative">
-                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                                <input
-                                    type="email" value={userEmail} onChange={(e) => setUserEmail(e.target.value)}
-                                    className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#00d26a]/20"
-                                />
-                            </div>
+                            <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">E-mail de Acesso</label>
+                            <input
+                                type="email" value={userEmail} onChange={(e) => setUserEmail(e.target.value)}
+                                className="w-full px-4 py-3 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#00d26a]/20"
+                            />
                         </div>
                     </div>
-                    <Button onClick={handleSaveProfile} className="w-full md:w-auto px-8 bg-[#00d26a] hover:bg-[#00b85c] text-white">Salvar Perfil</Button>
+                    <Button onClick={handleSaveProfile} className="bg-[#00d26a] hover:bg-[#00b85c] text-white px-8">Salvar Perfil</Button>
+                </Card>
+
+                {/* Security Section */}
+                <Card className="p-6 bg-white dark:bg-[#1E1E1E] border-none shadow-sm md:col-span-2">
+                    <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-4">
+                            <div className="p-3 bg-red-500/10 rounded-2xl text-red-500">
+                                <Lock size={24} />
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-gray-800 dark:text-white">Segurança</h3>
+                                <p className="text-xs text-gray-400">Proteja seu acesso ao sistema</p>
+                            </div>
+                        </div>
+                        <Button
+                            variant="ghost"
+                            onClick={() => setShowPasswordFields(!showPasswordFields)}
+                            className="text-sm text-[#00d26a]"
+                        >
+                            {showPasswordFields ? 'Cancelar' : 'Mudar Senha'}
+                        </Button>
+                    </div>
+
+                    {showPasswordFields && (
+                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="space-y-4 mb-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Senha Atual</label>
+                                    <div className="relative">
+                                        <input
+                                            type={showPass ? "text" : "password"}
+                                            value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)}
+                                            className="w-full px-4 py-3 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl text-sm outline-none"
+                                        />
+                                        <button onClick={() => setShowPass(!showPass)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
+                                            {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Nova Senha</label>
+                                    <input
+                                        type={showPass ? "text" : "password"}
+                                        value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
+                                        className="w-full px-4 py-3 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl text-sm outline-none"
+                                    />
+                                </div>
+                            </div>
+                            <Button onClick={handleChangePassword} className="bg-gray-800 text-white hover:bg-black px-8">Atualizar Senha</Button>
+                        </motion.div>
+                    )}
                 </Card>
 
                 <Card className="p-6 bg-white dark:bg-[#1E1E1E] border-none shadow-sm">
@@ -114,7 +177,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
                         </div>
                         <div>
                             <h3 className="font-bold text-gray-800 dark:text-white">Aparência</h3>
-                            <p className="text-xs text-gray-400">Personalize o visual do sistema</p>
+                            <p className="text-xs text-gray-400">Personalizar cores do sistema</p>
                         </div>
                     </div>
                     <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-white/5 rounded-2xl">
@@ -135,19 +198,17 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
                         </div>
                         <div>
                             <h3 className="font-bold text-gray-800 dark:text-white">Financeiro</h3>
-                            <p className="text-xs text-gray-400">Regras de cálculo e comissões</p>
+                            <p className="text-xs text-gray-400">Comissões e taxas padrão</p>
                         </div>
                     </div>
                     <div className="space-y-4">
-                        <div>
-                            <label className="block text-xs font-bold text-gray-400 uppercase mb-2">Comissão Padrão do Barbeiro (%)</label>
-                            <input
-                                type="number"
-                                value={commissionRate}
-                                onChange={(e) => setCommissionRate(parseInt(e.target.value))}
-                                className="w-full p-3 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#00d26a]/20"
-                            />
-                        </div>
+                        <label className="block text-[10px] font-bold text-gray-400 uppercase ml-1">Comissão Padrão (%)</label>
+                        <input
+                            type="number"
+                            value={commissionRate}
+                            onChange={(e) => setCommissionRate(parseInt(e.target.value))}
+                            className="w-full p-3 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl text-sm outline-none"
+                        />
                     </div>
                 </Card>
 
@@ -158,52 +219,47 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
                         </div>
                         <div>
                             <h3 className="font-bold text-gray-800 dark:text-white">Backup e Dados</h3>
-                            <p className="text-xs text-gray-400">Proteja seus dados locais</p>
+                            <p className="text-xs text-gray-400">Proteja seus dados</p>
                         </div>
                     </div>
                     <div className="space-y-3">
-                        <Button onClick={handleExportBackup} className="w-full bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-300 hover:bg-gray-200 border-none shadow-none gap-2">
-                            <Download size={18} /> Exportar Backup
+                        <Button variant="ghost" onClick={handleExportBackup} className="w-full justify-start bg-gray-50 dark:bg-white/5 border-none gap-2 text-sm">
+                            <Download size={18} /> Exportar Backup JSON
                         </Button>
                         <div className="relative">
-                            <input
-                                type="file"
-                                onChange={handleImportBackup}
-                                className="absolute inset-0 opacity-0 cursor-pointer"
-                                accept=".json"
-                            />
-                            <Button className="w-full bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-300 hover:bg-gray-200 border-none shadow-none gap-2">
-                                <Upload size={18} /> Importar Backup
+                            <input type="file" onChange={handleImportBackup} className="absolute inset-0 opacity-0 cursor-pointer" accept=".json" />
+                            <Button variant="ghost" className="w-full justify-start bg-gray-50 dark:bg-white/5 border-none gap-2 text-sm">
+                                <Upload size={18} /> Restaurar Backup
                             </Button>
                         </div>
-                        <Button onClick={handleClearLocalStorage} className="w-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white border-none shadow-none gap-2 mt-4 text-xs">
-                            <Trash2 size={16} /> Limpar Tudo
+                        <Button variant="ghost" onClick={handleClearLocalStorage} className="w-full justify-start text-red-500 bg-red-50/50 dark:bg-red-500/5 hover:bg-red-500 hover:text-white border-none gap-2 text-xs">
+                            <Trash2 size={16} /> Apagar Todos os Dados Locais
                         </Button>
                     </div>
                 </Card>
 
-                <Card className="p-6 bg-white dark:bg-[#1E1E1E] border-none shadow-sm">
-                    <div className="flex items-center gap-4 mb-6">
+                {/* Session Summary Card with Logout */}
+                <Card className="p-6 bg-white dark:bg-[#1E1E1E] border-none shadow-sm flex flex-col justify-between">
+                    <div className="flex items-center gap-4 mb-2">
                         <div className="p-3 bg-amber-500/10 rounded-2xl text-amber-500">
-                            <Shield size={24} />
+                            <Smartphone size={24} />
                         </div>
                         <div>
-                            <h3 className="font-bold text-gray-800 dark:text-white">Sistema</h3>
-                            <p className="text-xs text-gray-400">Informações da plataforma</p>
+                            <h3 className="font-bold text-gray-800 dark:text-white">Sessão</h3>
+                            <p className="text-xs text-gray-400">Dispositivo {window.innerWidth < 768 ? 'Mobile' : 'Desktop'}</p>
                         </div>
                     </div>
-                    <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                            <span className="text-gray-500">Status</span>
-                            <span className="font-bold text-[#00d26a]">Ativo (Premium)</span>
+                    <div className="space-y-4">
+                        <div className="flex justify-between items-center text-xs py-2 border-b border-gray-100 dark:border-white/5">
+                            <span className="text-gray-400">Versão: 1.0.12</span>
+                            <span className="text-[#00d26a] font-bold">Ativo</span>
                         </div>
-                        <div className="flex justify-between text-sm">
-                            <span className="text-gray-500">Versão</span>
-                            <span className="text-gray-400">1.0.9-stable</span>
-                        </div>
-                        <div className="pt-4 border-t border-gray-100 dark:border-white/5 text-[10px] text-gray-400 text-center">
-                            Pente Fino SaaS v1.0 <br /> Desenvolvido para Gestão de Barbearias
-                        </div>
+                        <Button
+                            onClick={() => { if (window.confirm("Deseja realmente sair?")) onLogout(); }}
+                            className="w-full bg-red-500 hover:bg-red-600 text-white gap-2 py-6 rounded-2xl shadow-lg shadow-red-500/20"
+                        >
+                            <LogOut size={20} /> Sair do Sistema
+                        </Button>
                     </div>
                 </Card>
             </div>

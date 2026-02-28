@@ -39,6 +39,13 @@ export default function HomeDashboard() {
   const [editingAccount, setEditingAccount] = useState<any>(null);
   const [editingClosing, setEditingClosing] = useState<any>(null);
 
+  const handleLogout = () => {
+    // Clear auth-related storage
+    sessionStorage.removeItem('pentefino_token');
+    localStorage.removeItem('pentefino_user');
+    navigate('/login');
+  };
+
   const sidebarItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'receitas', label: 'Receitas', icon: TrendingUp },
@@ -126,6 +133,7 @@ export default function HomeDashboard() {
           setDarkMode={setDarkMode}
           commissionRate={commissionRate}
           setCommissionRate={setCommissionRate}
+          onLogout={handleLogout}
         />;
       default:
         return <div className="p-20 text-center text-gray-400">Em desenvolvimento...</div>;
