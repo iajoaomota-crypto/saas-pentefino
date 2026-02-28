@@ -6,6 +6,7 @@ import {
 import { Card } from '../ui';
 import { cn } from '../../utils';
 import { BRAND_COLORS, REVENUE_CATEGORIES, EXPENSE_CATEGORIES, PAYMENT_METHODS } from '../../constants/config';
+import { sumAmounts } from '../../utils/financialUtils';
 
 interface DashboardChartsProps {
     transactions: any[];
@@ -23,12 +24,12 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ transactions =
 
         return last7Days.map(date => {
             const dayTransactions = (transactions || []).filter(t => t.date === date);
-            const receita = dayTransactions
+            const receita = sumAmounts(dayTransactions
                 .filter(t => t.type === 'income')
-                .reduce((acc, t) => acc + (t.amount || 0), 0);
-            const despesa = dayTransactions
+                .map(t => t.amount));
+            const despesa = sumAmounts(dayTransactions
                 .filter(t => t.type === 'expense')
-                .reduce((acc, t) => acc + (t.amount || 0), 0);
+                .map(t => t.amount));
 
             return {
                 name: date.split('/')[0] + '/' + date.split('/')[1],
@@ -44,9 +45,9 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ transactions =
 
         const categories = [...new Set(transactions.map(t => t.category))];
         return categories.map(cat => {
-            const value = transactions
+            const value = sumAmounts(transactions
                 .filter(t => t.category === cat)
-                .reduce((acc, t) => acc + (t.amount || 0), 0);
+                .map(t => t.amount));
 
             // Find color from payment methods or defaults
             const method = PAYMENT_METHODS.find(m => m.label === cat);

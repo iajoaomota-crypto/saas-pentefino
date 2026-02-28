@@ -202,8 +202,8 @@ export default function HomeDashboard() {
       )}>
         <div className="p-6 flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white dark:bg-white/5 rounded-lg flex items-center justify-center overflow-hidden border border-gray-100 dark:border-white/10 shadow-sm">
-              <img src="/logo.png" alt="Logo Pente Fino" className="w-full h-full object-cover p-1" />
+            <div className="w-10 h-10 flex items-center justify-center overflow-hidden">
+              <img src="/logo.png" alt="Logo Pente Fino" className="w-full h-full object-contain" />
             </div>
             <div><span className="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight">Pente Fino</span></div>
           </div>
@@ -253,8 +253,8 @@ export default function HomeDashboard() {
             <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-white/5 rounded-xl">
               <Menu size={24} />
             </button>
-            <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10">
-              <img src="/logo.png" alt="Logo" className="w-full h-full object-cover p-0.5" />
+            <div className="w-8 h-8 overflow-hidden flex items-center justify-center">
+              <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
             </div>
             <h1 className="font-bold text-gray-800 dark:text-white uppercase text-[10px] tracking-widest">{sidebarItems.find(i => i.id === activeTab)?.label}</h1>
           </div>
