@@ -281,7 +281,10 @@ app.post('/api/webhooks/payment', async (req, res) => {
     const email = payload.customer?.email ||
         payload.data?.buyer?.email ||
         payload.buyer?.email ||
-        payload.email;
+        payload.email ||
+        payload.payer?.email ||
+        payload.data?.object?.customer_email ||
+        payload.user_email;
 
     const isApproved = ['approved', 'paid', 'succeeded', 'compra_aprovada'].includes(status?.toLowerCase());
 
