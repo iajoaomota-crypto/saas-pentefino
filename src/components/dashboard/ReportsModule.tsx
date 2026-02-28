@@ -1,4 +1,6 @@
 import React from 'react';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { Card, Button } from '../ui';
 import { FileText, Download, PieChart, BarChart } from 'lucide-react';
 import { formatCurrency } from '../../utils/financialUtils';
@@ -10,7 +12,75 @@ interface ReportsModuleProps {
 
 export const ReportsModule: React.FC<ReportsModuleProps> = ({ stats, transactions }) => {
     const handleExportPDF = () => {
-        alert("Função de exportação PDF está sendo preparada para o ambiente de produção. Por enquanto, use o Backup em Configurações.");
+        try {
+            const doc = new jsPDF();
+            const now = new Date().toLocaleString('pt-BR');
+
+            // Header
+            doc.setFontSize(22);
+            doc.setTextColor(0, 210, 106); // #00d26a
+            doc.text('Pente Fino Barber Shop', 14, 20);
+
+            doc.setFontSize(10);
+            doc.setTextColor(100);
+            doc.text(`Relatório Gerencial - Gerado em: ${now}`, 14, 28);
+
+            // Summary Section
+            doc.setFontSize(16);
+            doc.setTextColor(0, 0, 0);
+            doc.text('Resumo Financeiro', 14, 45);
+
+            autoTable(doc, {
+                startY: 50,
+                head: [['Descrição', 'Valor']],
+                body: [
+                    ['Receita Bruta', formatCurrency(stats.totalIncome)],
+                    ['Despesas Totais', formatCurrency(stats.totalExpense)],
+                    ['Comissões Profissionais', formatCurrency(stats.totalCommissions)],
+                    ['Saldo em Caixa', formatCurrency(stats.balance)],
+                    ['LUCRO LÍQUIDO', formatCurrency(stats.netProfit)],
+                ],
+                theme: 'grid',
+                headStyles: { fillColor: [0, 210, 106] },
+                columnStyles: { 1: { halign: 'right', fontStyle: 'bold' } }
+            });
+
+            // Recent Transactions Section
+            const finalY = (doc as any).lastAutoTable.finalY + 15;
+            doc.setFontSize(16);
+            doc.text('Últimos Lançamentos', 14, finalY);
+
+            const tableData = transactions.slice(0, 50).map(t => [
+                t.date,
+                t.desc,
+                t.type === 'income' ? 'Entrada' : 'Saída',
+                t.category || '-',
+                formatCurrency(t.amount)
+            ]);
+
+            autoTable(doc, {
+                startY: finalY + 5,
+                head: [['Data', 'Descrição', 'Tipo', 'Categoria', 'Valor']],
+                body: tableData,
+                theme: 'striped',
+                headStyles: { fillColor: [50, 50, 50] },
+                columnStyles: { 4: { halign: 'right' } }
+            });
+
+            // Footer
+            const pageCount = (doc as any).internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(8);
+                doc.setTextColor(150);
+                doc.text(`Pente Fino - Software de Gestão | Página ${i} de ${pageCount}`, 14, doc.internal.pageSize.height - 10);
+            }
+
+            doc.save(`Relatorio_PenteFino_${new Date().toISOString().split('T')[0]}.pdf`);
+        } catch (error) {
+            console.error('PDF Error:', error);
+            alert("Erro ao gerar PDF. Verifique os dados e tente novamente.");
+        }
     };
 
     return (
