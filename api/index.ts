@@ -335,8 +335,14 @@ if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
 app.get('/api/data', authenticateToken, async (req: any, res: any) => {
     try {
         const userId = req.user.id;
-        const transactions = await db.query('SELECT * FROM transactions WHERE user_id = $1 ORDER BY date DESC, id DESC', [userId]);
-        const accounts = await db.query('SELECT * FROM accounts WHERE user_id = $1 ORDER BY created_at DESC', [userId]);
+        const transactions = await db.query(
+            'SELECT id, user_id, type, "desc", amount, category, date, barber, revenue_type as "revenueType", expense_type as "expenseType" FROM transactions WHERE user_id = $1 ORDER BY date DESC, id DESC',
+            [userId]
+        );
+        const accounts = await db.query(
+            'SELECT id, user_id, type, name, amount, due_date as "dueDate", status, paid_at as "paidAt", recurrence, variable_type as "variableType", reference_month as "referenceMonth" FROM accounts WHERE user_id = $1 ORDER BY created_at DESC',
+            [userId]
+        );
         const closings = await db.query('SELECT * FROM closings WHERE user_id = $1 ORDER BY date DESC', [userId]);
 
         res.json({

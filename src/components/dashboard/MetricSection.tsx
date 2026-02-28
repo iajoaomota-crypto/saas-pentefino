@@ -98,19 +98,19 @@ export const MetricSection: React.FC<MetricSectionProps> = ({ stats, darkMode })
                         <div className="flex flex-col">
                             <span className={cn(
                                 "text-[10px] font-black uppercase tracking-[0.3em] mb-3",
-                                isNegative ? "text-white/80" : "text-white/60"
+                                isNegative ? "text-white" : "text-white/90"
                             )}>
                                 {isNegative ? "Saldo Insuficiente" : "Saldo Disponível"}
                             </span>
                             <h2 className="text-4xl md:text-6xl font-black tracking-tight flex items-baseline gap-2 text-white">
-                                <span className="text-2xl font-light text-white/50">R$</span>
+                                <span className="text-2xl font-medium text-white/80">R$</span>
                                 {Math.abs(stats.balance).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                 {isNegative && <AlertCircle size={24} className="text-white ml-2 animate-bounce" />}
                             </h2>
                         </div>
                         <div className={cn(
                             "w-16 h-16 rounded-2xl flex items-center justify-center backdrop-blur-xl border shadow-2xl transition-all duration-300",
-                            isNegative ? "bg-white/20 border-white/40" : "bg-white/10 border-white/20"
+                            isNegative ? "bg-white/30 border-white/50" : "bg-white/20 border-white/30"
                         )}>
                             <Wallet size={32} className="text-white" />
                         </div>
@@ -118,38 +118,38 @@ export const MetricSection: React.FC<MetricSectionProps> = ({ stats, darkMode })
 
                     <div className={cn(
                         "grid grid-cols-2 gap-4 md:gap-8 pt-8 border-t",
-                        isNegative ? "border-white/20" : "border-white/10"
+                        isNegative ? "border-white/30" : "border-white/20"
                     )}>
                         <div className="flex flex-col gap-1">
                             <div className="flex items-center gap-2 mb-1">
                                 <div className={cn(
                                     "w-6 h-6 rounded-md flex items-center justify-center",
-                                    isNegative ? "bg-white/10 text-white" : "bg-[#00d26a]/20 text-[#00d26a]"
+                                    isNegative ? "bg-white/20 text-white" : "bg-white/20 text-white"
                                 )}>
                                     <ArrowUpCircle size={14} />
                                 </div>
                                 <span className={cn(
-                                    "text-[10px] font-bold uppercase tracking-widest",
-                                    isNegative ? "text-white/80" : "text-white/60"
+                                    "text-[10px] font-black uppercase tracking-widest",
+                                    isNegative ? "text-white" : "text-white/90"
                                 )}>Entradas</span>
                             </div>
-                            <span className="text-xl md:text-2xl font-bold text-white">{formatCurrency(stats.totalIncome)}</span>
+                            <span className="text-xl md:text-3xl font-black text-white">{formatCurrency(stats.totalIncome)}</span>
                         </div>
 
                         <div className="flex flex-col gap-1">
                             <div className="flex items-center gap-2 mb-1">
                                 <div className={cn(
                                     "w-6 h-6 rounded-md flex items-center justify-center",
-                                    isNegative ? "bg-white/10 text-white" : "bg-red-400/20 text-red-300"
+                                    isNegative ? "bg-white/20 text-white" : "bg-white/20 text-white"
                                 )}>
                                     <ArrowDownCircle size={14} />
                                 </div>
                                 <span className={cn(
-                                    "text-[10px] font-bold uppercase tracking-widest",
-                                    isNegative ? "text-white/80" : "text-white/60"
+                                    "text-[10px] font-black uppercase tracking-widest",
+                                    isNegative ? "text-white" : "text-white/90"
                                 )}>Saídas</span>
                             </div>
-                            <span className="text-xl md:text-2xl font-bold text-white">{formatCurrency(stats.totalExpense)}</span>
+                            <span className="text-xl md:text-3xl font-black text-white">{formatCurrency(stats.totalExpense)}</span>
                         </div>
                     </div>
                 </div>
