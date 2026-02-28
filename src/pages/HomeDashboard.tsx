@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, TrendingUp, TrendingDown, DollarSign, Calendar, BarChart3, FileText, Settings, Menu, X, Scissors, Wifi, WifiOff, Plus, Shield
+  LayoutDashboard, ArrowUpCircle, ArrowDownCircle, DollarSign, Calendar, BarChart3, FileText, Settings, Menu, X, Scissors, Wifi, WifiOff, Plus, Shield
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../utils';
@@ -43,7 +43,6 @@ export default function HomeDashboard() {
   const isAdmin = user.role === 'admin';
 
   const handleLogout = () => {
-    // Clear auth-related storage
     sessionStorage.removeItem('pentefino_token');
     localStorage.removeItem('pentefino_user');
     navigate('/login');
@@ -51,8 +50,8 @@ export default function HomeDashboard() {
 
   const sidebarItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'receitas', label: 'Receitas', icon: TrendingUp },
-    { id: 'despesas', label: 'Despesas', icon: TrendingDown },
+    { id: 'receitas', label: 'Receitas', icon: ArrowUpCircle },
+    { id: 'despesas', label: 'Despesas', icon: ArrowDownCircle },
     { id: 'contas', label: 'Contas', icon: DollarSign },
     { id: 'fechamentos', label: 'Fechamentos', icon: Calendar },
     { id: 'relatorios', label: 'Relatórios', icon: BarChart3 },
@@ -64,7 +63,7 @@ export default function HomeDashboard() {
     switch (activeTab) {
       case 'dashboard':
         return (
-          <div className="space-y-8">
+          <div className="space-y-8 pb-12">
             <MetricSection stats={stats} darkMode={darkMode} />
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <DashboardCharts transactions={filteredTransactions} darkMode={darkMode} />
@@ -106,7 +105,7 @@ export default function HomeDashboard() {
         );
       case 'fechamentos':
         return (
-          <div className="space-y-6">
+          <div className="space-y-6 pb-20">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-bold dark:text-white">Histórico de Fechamentos</h2>
               <Button onClick={() => setShowClosingModal(true)} className="bg-[#00d26a] hover:bg-[#00b85c] text-white gap-2">
@@ -144,7 +143,7 @@ export default function HomeDashboard() {
   };
 
   return (
-    <div className={cn("min-h-screen flex flex-col md:flex-row font-sans transition-colors duration-300", darkMode ? "dark bg-[#121212] text-gray-100" : "bg-[#f8fafc] text-gray-800")}>
+    <div className={cn("h-screen flex flex-col md:flex-row font-sans overflow-hidden transition-colors duration-300", darkMode ? "dark bg-[#121212] text-gray-100" : "bg-[#f8fafc] text-gray-800")}>
 
       {/* Sidebar for Desktop / Menu for Mobile */}
       <aside className={cn(
@@ -196,14 +195,14 @@ export default function HomeDashboard() {
         )}
       </AnimatePresence>
 
-      <main className="flex-1 p-4 md:p-8 lg:p-12 overflow-x-hidden pt-20 md:pt-8">
+      <main className="flex-1 overflow-y-auto no-scrollbar custom-scrollbar relative px-4 md:px-8 lg:px-12 pt-20 md:pt-8">
         {/* Mobile App Bar */}
         <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white dark:bg-[#1E1E1E] border-b border-gray-100 dark:border-white/5 flex items-center justify-between px-4 z-40">
           <div className="flex items-center gap-3">
             <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-white/5 rounded-xl">
               <Menu size={24} />
             </button>
-            <h1 className="font-bold text-gray-800 dark:text-white">{sidebarItems.find(i => i.id === activeTab)?.label}</h1>
+            <h1 className="font-bold text-gray-800 dark:text-white uppercase text-xs tracking-widest">{sidebarItems.find(i => i.id === activeTab)?.label}</h1>
           </div>
           <button onClick={() => setShowAddModal(true)} className="w-10 h-10 bg-[#00d26a] text-white rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-transform">
             <Plus size={24} />
@@ -243,7 +242,7 @@ export default function HomeDashboard() {
         </header>
 
         {/* Mobile Date Filters (Horizontal Scrollable) */}
-        <div className="md:hidden flex overflow-x-auto gap-2 mb-6 pb-2 no-scrollbar">
+        <div className="md:hidden flex overflow-x-auto gap-2 mb-6 pb-2 no-scrollbar scrollbar-hide">
           {[
             { id: 'today', label: 'Hoje' },
             { id: '7days', label: '7 dias' },
@@ -277,7 +276,9 @@ export default function HomeDashboard() {
           </motion.div>
         )}
 
-        {renderContent()}
+        <div className="relative">
+          {renderContent()}
+        </div>
 
         {/* Modals */}
         <TransactionModal

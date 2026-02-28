@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Filter, Trash2, Pencil, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { Search, Filter, Trash2, Pencil, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
 import { Card } from '../ui';
 import { cn } from '../../utils';
 import { formatCurrency } from '../../utils/financialUtils';
@@ -32,15 +32,15 @@ export const TransactionsModule: React.FC<TransactionsModuleProps> = ({
 
     return (
         <div className="space-y-4">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-[#1E1E1E] p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800">
-                <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-[#1E1E1E] p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-white/5">
+                <div className="flex gap-1 bg-gray-100 dark:bg-white/5 p-1 rounded-xl">
                     {isIncome ? (
                         <>
                             <button
                                 onClick={() => setSubTab('services')}
                                 className={cn(
-                                    "px-4 py-2 rounded-md text-sm font-medium transition-all",
-                                    subTab === 'services' ? "bg-white dark:bg-[#2A2A2A] text-[#00d26a] shadow-sm" : "text-gray-500 hover:text-gray-700"
+                                    "px-4 py-2 rounded-lg text-xs font-bold transition-all",
+                                    subTab === 'services' ? "bg-white dark:bg-[#2A2A2A] text-[#00d26a] shadow-sm" : "text-gray-400 hover:text-gray-600"
                                 )}
                             >
                                 Serviços
@@ -48,8 +48,8 @@ export const TransactionsModule: React.FC<TransactionsModuleProps> = ({
                             <button
                                 onClick={() => setSubTab('products')}
                                 className={cn(
-                                    "px-4 py-2 rounded-md text-sm font-medium transition-all",
-                                    subTab === 'products' ? "bg-white dark:bg-[#2A2A2A] text-[#00d26a] shadow-sm" : "text-gray-500 hover:text-gray-700"
+                                    "px-4 py-2 rounded-lg text-xs font-bold transition-all",
+                                    subTab === 'products' ? "bg-white dark:bg-[#2A2A2A] text-[#00d26a] shadow-sm" : "text-gray-400 hover:text-gray-600"
                                 )}
                             >
                                 Produtos
@@ -60,8 +60,8 @@ export const TransactionsModule: React.FC<TransactionsModuleProps> = ({
                             <button
                                 onClick={() => setSubTab('professional')}
                                 className={cn(
-                                    "px-4 py-2 rounded-md text-sm font-medium transition-all",
-                                    subTab === 'professional' ? "bg-white dark:bg-[#2A2A2A] text-red-500 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                                    "px-4 py-2 rounded-lg text-xs font-bold transition-all",
+                                    subTab === 'professional' ? "bg-white dark:bg-[#2A2A2A] text-red-500 shadow-sm" : "text-gray-400 hover:text-gray-600"
                                 )}
                             >
                                 Profissional
@@ -69,8 +69,8 @@ export const TransactionsModule: React.FC<TransactionsModuleProps> = ({
                             <button
                                 onClick={() => setSubTab('personal')}
                                 className={cn(
-                                    "px-4 py-2 rounded-md text-sm font-medium transition-all",
-                                    subTab === 'personal' ? "bg-white dark:bg-[#2A2A2A] text-red-500 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                                    "px-4 py-2 rounded-lg text-xs font-bold transition-all",
+                                    subTab === 'personal' ? "bg-white dark:bg-[#2A2A2A] text-red-500 shadow-sm" : "text-gray-400 hover:text-gray-600"
                                 )}
                             >
                                 Pessoal
@@ -86,27 +86,27 @@ export const TransactionsModule: React.FC<TransactionsModuleProps> = ({
                         placeholder="Buscar lançamentos..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-800 border-none rounded-xl text-sm focus:ring-2 focus:ring-[#00d26a]/20 outline-none transition-all"
+                        className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-white/5 border-none rounded-xl text-sm focus:ring-2 focus:ring-[#00d26a]/20 outline-none transition-all font-medium"
                     />
                 </div>
             </div>
 
-            <Card className="overflow-hidden border-none shadow-sm bg-white dark:bg-[#1E1E1E]">
-                <div className="overflow-x-auto">
+            <Card className="overflow-hidden border-none shadow-sm bg-white dark:bg-[#1E1E1E] rounded-2xl">
+                <div className="overflow-x-auto no-scrollbar scrollbar-hide">
                     <table className="w-full text-left">
                         <thead>
-                            <tr className="border-b border-gray-100 dark:border-gray-800">
-                                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Lançamento</th>
-                                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Categoria</th>
-                                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Data</th>
-                                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Valor</th>
-                                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-right">Ações</th>
+                            <tr className="border-b border-gray-100 dark:border-white/5">
+                                <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Lançamento</th>
+                                <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Categoria</th>
+                                <th className="hidden md:table-cell px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Data</th>
+                                <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Valor</th>
+                                <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right">Ações</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-50 dark:divide-gray-800/50">
+                        <tbody className="divide-y divide-gray-50 dark:divide-white/5">
                             {transactions.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-12 text-center text-gray-400 italic">
+                                    <td colSpan={5} className="px-6 py-12 text-center text-gray-400 italic text-sm">
                                         Nenhum lançamento encontrado para este filtro.
                                     </td>
                                 </tr>
@@ -116,37 +116,37 @@ export const TransactionsModule: React.FC<TransactionsModuleProps> = ({
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
                                                 <div className={cn(
-                                                    "w-8 h-8 rounded-lg flex items-center justify-center",
+                                                    "w-10 h-10 rounded-xl flex items-center justify-center shadow-sm",
                                                     isIncome ? "bg-[#00d26a]/10 text-[#00d26a]" : "bg-red-500/10 text-red-500"
                                                 )}>
-                                                    {isIncome ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
+                                                    {isIncome ? <ArrowUpCircle size={20} /> : <ArrowDownCircle size={20} />}
                                                 </div>
                                                 <div className="flex flex-col">
-                                                    <span className="font-semibold text-gray-700 dark:text-gray-200">{t.desc}</span>
-                                                    {t.barber && <span className="text-[10px] text-gray-400 font-medium">{t.barber}</span>}
+                                                    <span className="font-bold text-gray-800 dark:text-gray-100 text-sm">{t.desc}</span>
+                                                    {t.barber && <span className="text-[10px] text-gray-400 font-black uppercase tracking-wider">{t.barber}</span>}
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex flex-col">
-                                                <span className="text-sm text-gray-500 dark:text-gray-400">{t.category}</span>
-                                                <span className="text-[10px] text-gray-400 uppercase font-bold">
+                                                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{t.category}</span>
+                                                <span className="text-[10px] text-gray-400 uppercase font-black tracking-tighter">
                                                     {isIncome ? t.revenueType : t.expenseType}
                                                 </span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{t.date}</td>
+                                        <td className="hidden md:table-cell px-6 py-4 text-xs font-bold text-gray-400">{t.date}</td>
                                         <td className="px-6 py-4">
-                                            <span className={cn("font-bold", isIncome ? "text-[#00d26a]" : "text-red-500")}>
+                                            <span className={cn("font-black text-sm", isIncome ? "text-[#00d26a]" : "text-red-500")}>
                                                 {formatCurrency(t.amount)}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                            <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button onClick={() => onEdit(t)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-400 hover:text-blue-500 transition-colors">
+                                            <div className="flex items-center justify-end gap-1 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button onClick={() => onEdit(t)} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl text-gray-400 hover:text-blue-500 transition-all active:scale-90">
                                                     <Pencil size={16} />
                                                 </button>
-                                                <button onClick={() => onDelete(t.id)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-400 hover:text-red-500 transition-colors">
+                                                <button onClick={() => onDelete(t.id)} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl text-gray-400 hover:text-red-500 transition-all active:scale-90">
                                                     <Trash2 size={16} />
                                                 </button>
                                             </div>
