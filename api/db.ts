@@ -20,50 +20,65 @@ const pool = new Pool({
   ssl: (connectionString.includes('sslmode=disable')) ? false : { rejectUnauthorized: false }
 });
 
+let isInitialized = false;
+let initializationPromise: Promise<void> | null = null;
+
 // Initialize database tables
 export async function initDB() {
-  console.log('Attempting to initialize database...');
-  try {
-    const client = await pool.connect();
-    console.log('Connected to PostgreSQL successfully.');
+  if (isInitialized) return;
+  if (initializationPromise) return initializationPromise;
 
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        username TEXT UNIQUE NOT NULL,
-        name TEXT NOT NULL DEFAULT '',
-        email TEXT UNIQUE NOT NULL DEFAULT '',
-        password TEXT NOT NULL,
-        role TEXT DEFAULT 'user',
-        active INTEGER DEFAULT 1,
-        expiration_date TIMESTAMP DEFAULT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
+  initializationPromise = (async () => {
+    console.log('Attempting to initialize database...');
+    let client;
+    try {
+      client = await pool.connect();
+      console.log('Connected to PostgreSQL successfully.');
 
-    // Verify if columns exist (for migration if table was created differently before)
-    // Note: Postgres is more strict, but for a new VPS deploy this will likely be fresh.
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS users (
+          id SERIAL PRIMARY KEY,
+          username TEXT UNIQUE NOT NULL,
+          name TEXT,
+          email TEXT UNIQUE,
+          password TEXT NOT NULL,
+          role TEXT DEFAULT 'user',
+          active INTEGER DEFAULT 1,
+          expiration_date TIMESTAMP,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
 
-    console.log('Database tables verified/created.');
+      // Create master user if not exists
+      const masterCheck = await client.query('SELECT id FROM users WHERE username = $1', ['master']);
+      if (masterCheck.rowCount === 0) {
+        const masterPassword = bcrypt.hashSync('master', 10);
+        await client.query(`
+          INSERT INTO users (username, password, name, email, role, active)
+          VALUES ('master', $1, 'Administrador Master', 'master@pentefino.com', 'admin', 1)
+        `, [masterPassword]);
+        console.log('Master user created.');
+      }
 
-    // Check if master user exists
-    const masterCheck = await client.query('SELECT * FROM users WHERE username = $1', ['master']);
-    if (masterCheck.rowCount === 0) {
-      const hashedPassword = bcrypt.hashSync('master', 10);
-      await client.query(
-        'INSERT INTO users (username, name, email, password, role) VALUES ($1, $2, $3, $4, $5)',
-        ['master', 'Admin Master', 'master@admin.com', hashedPassword, 'admin']
-      );
-      console.log('Master user created.');
+      console.log('Database tables initialized/verified.');
+      isInitialized = true;
+    } catch (err) {
+      console.error('Database initialization error:', err);
+      throw err;
+    } finally {
+      if (client) client.release();
     }
+  })();
 
-    client.release();
-    return true;
-  } catch (err: any) {
-    console.error('FATAL ERROR: Error initializing PostgreSQL:', err.message);
-    if (err.code) console.error('Error Code:', err.code);
-    return false;
-  }
+  return initializationPromise;
 }
 
-export default pool;
+// Wrapper to ensure DB is initialized before any query
+export const db = {
+  query: async (text: string, params?: any[]) => {
+    await initDB();
+    return await pool.query(text, params);
+  }
+};
+
+export default db;
