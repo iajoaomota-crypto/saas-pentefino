@@ -115,7 +115,9 @@ export function useDashboardData() {
                 return tDate >= limit;
             }
             if (dateFilter === 'month') {
-                return tDate.getMonth() === now.getMonth() && tDate.getFullYear() === now.getFullYear();
+                const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+                const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+                return tDate >= monthStart && tDate <= monthEnd;
             }
             if (dateFilter === 'custom' && startDate && endDate) {
                 // Ensure dates are parsed as local YYYY-MM-DD

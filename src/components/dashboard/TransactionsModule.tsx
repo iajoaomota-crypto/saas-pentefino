@@ -136,18 +136,18 @@ export const TransactionsModule: React.FC<TransactionsModuleProps> = ({
                                             </div>
                                         </td>
                                         <td className="hidden md:table-cell px-6 py-4 text-xs font-bold text-gray-400">{t.date}</td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 whitespace-nowrap">
                                             <span className={cn("font-black text-sm", isIncome ? "text-[#00d26a]" : "text-red-500")}>
                                                 {formatCurrency(t.amount)}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                            <div className="flex items-center justify-end gap-1 md:opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button onClick={() => onEdit(t)} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl text-gray-400 hover:text-blue-500 transition-all active:scale-90">
-                                                    <Pencil size={16} />
+                                            <div className="flex items-center justify-end gap-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                                                <button onClick={() => onEdit(t)} className="p-3 md:p-2 bg-blue-500/5 md:bg-transparent hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl text-blue-500 md:text-gray-400 md:hover:text-blue-500 transition-all active:scale-90 shadow-sm md:shadow-none">
+                                                    <Pencil size={18} className="md:w-4 md:h-4" />
                                                 </button>
-                                                <button onClick={() => onDelete(t.id)} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl text-gray-400 hover:text-red-500 transition-all active:scale-90">
-                                                    <Trash2 size={16} />
+                                                <button onClick={() => onDelete(t.id)} className="p-3 md:p-2 bg-red-500/5 md:bg-transparent hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl text-red-500 md:text-gray-400 md:hover:text-red-500 transition-all active:scale-90 shadow-sm md:shadow-none">
+                                                    <Trash2 size={18} className="md:w-4 md:h-4" />
                                                 </button>
                                             </div>
                                         </td>

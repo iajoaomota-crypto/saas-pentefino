@@ -108,22 +108,22 @@ export const AccountsModule: React.FC<AccountsModuleProps> = ({
                                     <span className="text-xs text-gray-400">Vencimento: dia {acc.dueDate}</span>
                                     <span className="text-lg font-bold text-gray-700 dark:text-gray-200">{formatCurrency(acc.amount)}</span>
                                 </div>
-                                <div className="flex gap-1">
+                                <div className="flex gap-2">
                                     <button
                                         onClick={() => onToggleStatus(acc.id)}
                                         className={cn(
-                                            "p-2 rounded-lg transition-colors",
-                                            acc.status === 'paid' ? "text-gray-400 hover:text-amber-500" : "text-gray-400 hover:text-[#00d26a]"
+                                            "p-3 rounded-xl transition-all shadow-sm active:scale-95",
+                                            acc.status === 'paid' ? "bg-amber-500/10 text-amber-500 hover:bg-amber-500/20" : "bg-[#00d26a]/10 text-[#00d26a] hover:bg-[#00d26a]/20"
                                         )}
                                         title={acc.status === 'paid' ? "Marcar como pendente" : "Marcar como paga"}
                                     >
-                                        {acc.status === 'paid' ? <Clock size={18} /> : <CheckCircle2 size={18} />}
+                                        {acc.status === 'paid' ? <Clock size={20} /> : <CheckCircle2 size={20} />}
                                     </button>
-                                    <button onClick={() => onEditAccount(acc)} className="p-2 text-gray-400 hover:text-blue-500 rounded-lg">
-                                        <Pencil size={18} />
+                                    <button onClick={() => onEditAccount(acc)} className="p-3 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 rounded-xl shadow-sm active:scale-95">
+                                        <Pencil size={20} />
                                     </button>
-                                    <button onClick={() => onDeleteAccount(acc.id)} className="p-2 text-gray-400 hover:text-red-500 rounded-lg">
-                                        <Trash2 size={18} />
+                                    <button onClick={() => onDeleteAccount(acc.id)} className="p-3 bg-red-500/10 text-red-500 hover:bg-red-500/20 rounded-xl shadow-sm active:scale-95">
+                                        <Trash2 size={20} />
                                     </button>
                                 </div>
                             </div>

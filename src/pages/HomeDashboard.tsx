@@ -316,17 +316,17 @@ export default function HomeDashboard() {
           {[
             { id: 'today', label: 'Hoje' },
             { id: 'yesterday', label: 'Ontem' },
-            { id: '7days', label: '7 dias' },
-            { id: '14days', label: '14 dias' },
-            { id: 'month', label: 'Mensal' },
-            { id: 'custom', label: 'Personalizado' },
+            { id: '7days', label: '7d' },
+            { id: '14days', label: '14d' },
+            { id: 'month', label: 'Mês' },
+            { id: 'custom', label: 'Filtro' },
           ].map(f => (
             <button
               key={f.id}
               onClick={() => setDateFilter(f.id)}
               className={cn(
-                "px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all",
-                dateFilter === f.id ? "bg-[#00d26a] text-white shadow-md" : "bg-white dark:bg-[#1E1E1E] text-gray-500 border border-gray-100 dark:border-white/5"
+                "px-5 py-2.5 rounded-xl text-xs font-black whitespace-nowrap transition-all uppercase tracking-tight",
+                dateFilter === f.id ? "bg-[#00d26a] text-white shadow-lg scale-105" : "bg-white dark:bg-[#1E1E1E] text-gray-500 border border-gray-100 dark:border-white/5 active:scale-95"
               )}
             >
               {f.label}
