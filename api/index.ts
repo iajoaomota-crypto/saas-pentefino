@@ -324,6 +324,15 @@ app.post('/api/webhooks/payment', async (req, res) => {
 // Dedicated Kirvano Webhook
 app.post('/api/webhooks/kirvano', async (req, res) => {
     const payload = req.body;
+    const kirvanoToken = req.headers['x-kirvano-token'];
+
+    // Optional security: If a token is set in environment, verify it
+    const expectedToken = process.env.KIRVANO_WEBHOOK_TOKEN;
+    if (expectedToken && kirvanoToken !== expectedToken) {
+        console.warn('Unauthorized Kirvano Webhook attempt: Invalid token');
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
     console.log('Kirvano Webhook received:', JSON.stringify(payload, null, 2));
 
     // Kirvano common event names

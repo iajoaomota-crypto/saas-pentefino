@@ -1,12 +1,22 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="512" height="512" rx="100" fill="#00D26A"/>
-  <!-- Professional Comb Silhouette -->
-  <path d="M120 160C120 154.477 124.477 150 130 150H382C387.523 150 392 154.477 392 160V200H120V160Z" fill="white"/>
-  <rect x="135" y="200" width="15" height="140" rx="4" fill="white"/>
-  <rect x="175" y="200" width="15" height="140" rx="4" fill="white"/>
-  <rect x="215" y="200" width="15" height="140" rx="4" fill="white"/>
-  <rect x="255" y="200" width="15" height="140" rx="4" fill="white"/>
-  <rect x="295" y="200" width="15" height="140" rx="4" fill="white"/>
-  <rect x="335" y="200" width="15" height="140" rx="4" fill="white"/>
-  <rect x="375" y="200" width="15" height="50" rx="4" fill="white"/>
+  <!-- Rounded Square Background -->
+  <rect width="512" height="512" rx="120" fill="#00D26A"/>
+  
+  <!-- Slanted Comb Silhouette -->
+  <g transform="translate(256, 256) rotate(-45) translate(-256, -256)">
+    <!-- Main Handle/Body -->
+    <path d="M120 210C120 198.954 128.954 190 140 190H372C383.046 190 392 198.954 392 210V240H120V210Z" fill="white"/>
+    
+    <!-- Teeth -->
+    <rect x="135" y="240" width="16" height="120" rx="6" fill="white"/>
+    <rect x="175" y="240" width="16" height="120" rx="6" fill="white"/>
+    <rect x="215" y="240" width="16" height="120" rx="6" fill="white"/>
+    <rect x="255" y="240" width="16" height="120" rx="6" fill="white"/>
+    <rect x="295" y="240" width="16" height="120" rx="6" fill="white"/>
+    <rect x="335" y="240" width="16" height="120" rx="6" fill="white"/>
+    <rect x="375" y="240" width="16" height="40" rx="6" fill="white"/>
+    
+    <!-- Handle Tail -->
+    <path d="M120 190V240L80 240C68.9543 240 60 231.046 60 220C60 203.431 73.4315 190 90 190H120Z" fill="white"/>
+  </g>
 </svg>
