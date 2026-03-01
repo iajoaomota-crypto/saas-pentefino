@@ -448,7 +448,7 @@ app.post('/api/transactions', authenticateToken, async (req: any, res: any) => {
     const { type, desc, amount, category, date, barber, revenueType, expenseType } = req.body;
     try {
         const result = await db.query(
-            'INSERT INTO transactions (user_id, type, "desc", amount, category, date, barber, revenue_type, expense_type) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
+            'INSERT INTO transactions (user_id, type, "desc", amount, category, date, barber, revenue_type, expense_type) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, user_id, type, "desc", amount, category, date, barber, revenue_type as "revenueType", expense_type as "expenseType"',
             [req.user.id, type, desc, amount, category, date, barber, revenueType, expenseType]
         );
         res.status(201).json(result.rows[0]);
@@ -461,7 +461,7 @@ app.put('/api/transactions/:id', authenticateToken, async (req: any, res: any) =
     const { type, desc, amount, category, date, barber, revenueType, expenseType } = req.body;
     try {
         const result = await db.query(
-            'UPDATE transactions SET type = $1, "desc" = $2, amount = $3, category = $4, date = $5, barber = $6, revenue_type = $7, expense_type = $8 WHERE id = $9 AND user_id = $10 RETURNING *',
+            'UPDATE transactions SET type = $1, "desc" = $2, amount = $3, category = $4, date = $5, barber = $6, revenue_type = $7, expense_type = $8 WHERE id = $9 AND user_id = $10 RETURNING id, user_id, type, "desc", amount, category, date, barber, revenue_type as "revenueType", expense_type as "expenseType"',
             [type, desc, amount, category, date, barber, revenueType, expenseType, req.params.id, req.user.id]
         );
         if (result.rowCount === 0) return res.status(404).json({ error: 'Not found' });
@@ -485,7 +485,7 @@ app.post('/api/accounts', authenticateToken, async (req: any, res: any) => {
     const { type, name, amount, dueDate, status, paidAt, recurrence, variableType, referenceMonth } = req.body;
     try {
         const result = await db.query(
-            'INSERT INTO accounts (user_id, type, name, amount, due_date, status, paid_at, recurrence, variable_type, reference_month) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
+            'INSERT INTO accounts (user_id, type, name, amount, due_date, status, paid_at, recurrence, variable_type, reference_month) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id, user_id, type, name, amount, due_date as "dueDate", status, paid_at as "paidAt", recurrence, variable_type as "variableType", reference_month as "referenceMonth"',
             [req.user.id, type, name, amount, dueDate, status, paidAt, recurrence, variableType, referenceMonth]
         );
         res.status(201).json(result.rows[0]);
@@ -498,7 +498,7 @@ app.put('/api/accounts/:id', authenticateToken, async (req: any, res: any) => {
     const { type, name, amount, dueDate, status, paidAt, recurrence, variableType, referenceMonth } = req.body;
     try {
         const result = await db.query(
-            'UPDATE accounts SET type = $1, name = $2, amount = $3, due_date = $4, status = $5, paid_at = $6, recurrence = $7, variable_type = $8, reference_month = $9 WHERE id = $10 AND user_id = $11 RETURNING *',
+            'UPDATE accounts SET type = $1, name = $2, amount = $3, due_date = $4, status = $5, paid_at = $6, recurrence = $7, variable_type = $8, reference_month = $9 WHERE id = $10 AND user_id = $11 RETURNING id, user_id, type, name, amount, due_date as "dueDate", status, paid_at as "paidAt", recurrence, variable_type as "variableType", reference_month as "referenceMonth"',
             [type, name, amount, dueDate, status, paidAt, recurrence, variableType, referenceMonth, req.params.id, req.user.id]
         );
         if (result.rowCount === 0) return res.status(404).json({ error: 'Not found' });

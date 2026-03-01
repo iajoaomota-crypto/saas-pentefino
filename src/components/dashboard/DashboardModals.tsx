@@ -26,11 +26,11 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
     useEffect(() => {
         if (editingTransaction) {
-            setDesc(editingTransaction.desc);
-            setAmount(editingTransaction.amount.toString());
-            setType(editingTransaction.type);
-            setCategory(editingTransaction.category);
-            setDate(editingTransaction.date.split('/').reverse().join('-'));
+            setDesc(editingTransaction.desc || '');
+            setAmount((editingTransaction.amount ?? '').toString());
+            setType(editingTransaction.type || 'income');
+            setCategory(editingTransaction.category || 'PIX');
+            setDate((editingTransaction.date || '').split('/').reverse().join('-'));
             setRevenueType(editingTransaction.revenueType || 'services');
             setExpenseType(editingTransaction.expenseType || 'Empresa');
             setBarber(editingTransaction.barber || '');
@@ -208,12 +208,12 @@ export const AccountModal: React.FC<AccountModalProps> = ({
 
     useEffect(() => {
         if (editingAccount) {
-            setName(editingAccount.name);
-            setCategory(editingAccount.category);
-            setAmount(editingAccount.amount.toString());
-            setDueDate(editingAccount.dueDate.toString());
+            setName(editingAccount.name || '');
+            setCategory(editingAccount.category || 'Outras');
+            setAmount((editingAccount.amount ?? '').toString());
+            setDueDate((editingAccount.dueDate ?? '').toString());
             setVariableType(editingAccount.variableType || 'unica');
-            setReferenceMonth(editingAccount.referenceMonth);
+            setReferenceMonth(editingAccount.referenceMonth || '');
         } else {
             setName('');
             setCategory('Outras');

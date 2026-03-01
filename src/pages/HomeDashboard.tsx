@@ -224,7 +224,7 @@ export default function HomeDashboard() {
         <div className="p-6 flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-white dark:bg-white/10 rounded-xl flex items-center justify-center overflow-hidden border border-gray-100 dark:border-white/10 shadow-sm transition-all hover:scale-105">
-              <img src="/logo.svg" alt="Logo Pente Fino" className="w-full h-full object-contain p-1" />
+              <img src="/logo-v5.png" alt="Logo Pente Fino" className="w-full h-full object-contain p-1" />
             </div>
             <div><span className="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight">Pente Fino</span></div>
           </div>
@@ -275,7 +275,7 @@ export default function HomeDashboard() {
               <Menu size={24} />
             </button>
             <div className="w-9 h-9 bg-white dark:bg-white/10 rounded-xl overflow-hidden flex items-center justify-center border border-gray-100 dark:border-white/10 shadow-sm">
-              <img src="/logo.svg" alt="Logo" className="w-full h-full object-contain p-1" />
+              <img src="/logo-v5.png" alt="Logo" className="w-full h-full object-contain p-1" />
             </div>
             <h1 className="font-bold text-gray-800 dark:text-white uppercase text-[10px] tracking-widest">{sidebarItems.find(i => i.id === activeTab)?.label}</h1>
           </div>

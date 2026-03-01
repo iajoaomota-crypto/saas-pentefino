@@ -96,7 +96,7 @@ export default function Login() {
                     className="text-center"
                 >
                     <div className="mx-auto h-20 w-20 bg-white dark:bg-white/10 rounded-2xl flex items-center justify-center shadow-xl border border-gray-100 dark:border-white/10 overflow-hidden transition-all hover:scale-105">
-                        <img src="/logo.svg" alt="Logo Pente Fino" className="w-full h-full object-contain p-2" />
+                        <img src="/logo-v5.png" alt="Logo Pente Fino" className="w-full h-full object-contain p-2" />
                     </div>
                     <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
                         {isRegister ? 'Criar Nova Conta' : 'Acesso ao Sistema'}
