@@ -349,7 +349,12 @@ app.post('/api/webhooks/kirvano', async (req, res) => {
     }
 
     try {
-        if (['order_approved', 'sale_approved', 'purchase_approved', 'paid'].includes(event?.toLowerCase())) {
+        const isRenewalOrApproval = [
+            'order_approved', 'sale_approved', 'purchase_approved', 'paid',
+            'subscription_renewed', 'subscription_renew', 'order_renewed'
+        ].includes(event?.toLowerCase());
+
+        if (isRenewalOrApproval) {
             const expiration = new Date();
             expiration.setDate(expiration.getDate() + 30);
             const expStr = expiration.toISOString();
@@ -359,14 +364,14 @@ app.post('/api/webhooks/kirvano', async (req, res) => {
 
             if (user) {
                 await db.query('UPDATE users SET active = 1, expiration_date = $1, last_payment_status = $2 WHERE id = $3', [expStr, 'APPROVED', user.id]);
-                console.log(`Kirvano: User ${email} access granted/extended.`);
+                console.log(`Kirvano: User ${email} access granted/extended (Event: ${event}).`);
             } else {
                 // Using email handles username uniqueness better and is easier to remember
                 const username = email;
                 const defaultPassword = bcrypt.hashSync('pente123', 10);
                 await db.query('INSERT INTO users (username, name, email, password, role, active, expiration_date, last_payment_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
                     [username, email.split('@')[0], email, defaultPassword, 'user', 1, expStr, 'APPROVED']);
-                console.log(`Kirvano: New user created with email as username for ${email}.`);
+                console.log(`Kirvano: New user created with email as username for ${email} (Event: ${event}).`);
             }
         }
         else if (['subscription_canceled', 'subscription_cancelled', 'subscription_inactive'].includes(event?.toLowerCase())) {
