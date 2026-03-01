@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import HomeDashboard from './pages/HomeDashboard';
 import Login from './pages/Login';
 import Admin from './pages/Admin';
+import Welcome from './pages/Welcome';
 
 const ProtectedRoute = ({ children, requireAdmin = false }: { children: React.ReactNode, requireAdmin?: boolean }) => {
     const token = localStorage.getItem('auth_token');
@@ -60,6 +61,7 @@ function App() {
                         <Admin />
                     </ProtectedRoute>
                 } />
+                <Route path="/welcome" element={<Welcome />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
         </BrowserRouter>
