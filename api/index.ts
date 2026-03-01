@@ -309,7 +309,7 @@ app.post('/api/webhooks/payment', async (req, res) => {
             await db.query('UPDATE users SET active = 1, expiration_date = $1, last_payment_status = $2 WHERE id = $3', [expStr, 'APPROVED', user.id]);
         } else {
             const username = email.split('@')[0] + Math.floor(Math.random() * 1000);
-            const defaultPassword = bcrypt.hashSync('pente123', 10);
+            const defaultPassword = bcrypt.hashSync('1234', 10);
             await db.query('INSERT INTO users (username, name, email, password, role, active, expiration_date, last_payment_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
                 [username, email.split('@')[0], email, defaultPassword, 'user', 1, expStr, 'APPROVED']);
         }
@@ -373,7 +373,7 @@ app.post('/api/webhooks/kirvano', async (req, res) => {
             } else {
                 console.log(`User not found. Creating new user for ${email}...`);
                 const username = email;
-                const defaultPassword = bcrypt.hashSync('pente123', 10);
+                const defaultPassword = bcrypt.hashSync('1234', 10);
                 await db.query('INSERT INTO users (username, name, email, password, role, active, expiration_date, last_payment_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
                     [username, email.split('@')[0], email, defaultPassword, 'user', 1, expStr, 'APPROVED']);
                 console.log(`Kirvano: New user created with email as username for ${email} (Event: ${event}).`);
