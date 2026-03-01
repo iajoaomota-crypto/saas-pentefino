@@ -25,6 +25,7 @@ export function useDashboardData() {
     const [subTab, setSubTab] = useState('services');
     const [accountsTab, setAccountsTab] = useState<'fixas' | 'variaveis'>('fixas');
     const [commissionRate, setCommissionRate] = useState(50);
+    const [userStatus, setUserStatus] = useState<any>(null);
 
     const [loading, setLoading] = useState(true);
 
@@ -41,6 +42,7 @@ export function useDashboardData() {
                 setTransactions(data.transactions);
                 setAccounts(data.accounts);
                 setClosings(data.closings);
+                if (data.userStatus) setUserStatus(data.userStatus);
             }
         } catch (error) {
             console.error('Fetch error:', error);
@@ -428,7 +430,7 @@ export function useDashboardData() {
         dateFilter, setDateFilter, startDate, setStartDate, endDate, setEndDate,
         searchTerm, setSearchTerm, subTab, setSubTab, accountsTab, setAccountsTab,
         commissionRate, setCommissionRate,
-        filteredTransactions, stats,
+        filteredTransactions, stats, userStatus,
         handleAddTransaction, handleUpdateTransaction, handleDeleteTransaction,
         handleAddAccount, handleUpdateAccount, handleDeleteAccount, handleToggleAccountStatus,
         handleAddClosing

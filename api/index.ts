@@ -306,17 +306,71 @@ app.post('/api/webhooks/payment', async (req, res) => {
         const user = userResult.rows[0];
 
         if (user) {
-            await db.query('UPDATE users SET active = 1, expiration_date = $1 WHERE id = $2', [expStr, user.id]);
+            await db.query('UPDATE users SET active = 1, expiration_date = $1, last_payment_status = $2 WHERE id = $3', [expStr, 'APPROVED', user.id]);
         } else {
             const username = email.split('@')[0] + Math.floor(Math.random() * 1000);
             const defaultPassword = bcrypt.hashSync('pente123', 10);
-            await db.query('INSERT INTO users (username, name, email, password, role, active, expiration_date) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-                [username, email.split('@')[0], email, defaultPassword, 'user', 1, expStr]);
+            await db.query('INSERT INTO users (username, name, email, password, role, active, expiration_date, last_payment_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
+                [username, email.split('@')[0], email, defaultPassword, 'user', 1, expStr, 'APPROVED']);
         }
 
         res.json({ message: 'User access updated' });
     } catch (error) {
         console.error('Webhook error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Dedicated Kirvano Webhook
+app.post('/api/webhooks/kirvano', async (req, res) => {
+    const payload = req.body;
+    console.log('Kirvano Webhook received:', JSON.stringify(payload, null, 2));
+
+    // Kirvano common event names
+    // order_approved, sale_refunded, subscription_canceled
+    const event = payload.event || payload.type;
+    const email = payload.data?.order?.customer?.email ||
+        payload.data?.subscription?.customer?.email ||
+        payload.data?.buyer?.email ||
+        payload.customer?.email;
+
+    if (!email) {
+        console.error('Kirvano Webhook Error: Email not found');
+        return res.status(400).json({ error: 'Email not found in Kirvano payload' });
+    }
+
+    try {
+        if (['order_approved', 'sale_approved', 'purchase_approved', 'paid'].includes(event?.toLowerCase())) {
+            const expiration = new Date();
+            expiration.setDate(expiration.getDate() + 30);
+            const expStr = expiration.toISOString();
+
+            const userResult = await db.query('SELECT id FROM users WHERE email = $1', [email]);
+            const user = userResult.rows[0];
+
+            if (user) {
+                await db.query('UPDATE users SET active = 1, expiration_date = $1, last_payment_status = $2 WHERE id = $3', [expStr, 'APPROVED', user.id]);
+                console.log(`Kirvano: User ${email} access granted/extended.`);
+            } else {
+                const username = email.split('@')[0] + Math.floor(Math.random() * 1000);
+                const defaultPassword = bcrypt.hashSync('pente123', 10);
+                await db.query('INSERT INTO users (username, name, email, password, role, active, expiration_date, last_payment_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
+                    [username, email.split('@')[0], email, defaultPassword, 'user', 1, expStr, 'APPROVED']);
+                console.log(`Kirvano: New user created for ${email}.`);
+            }
+        }
+        else if (['subscription_canceled', 'subscription_cancelled', 'subscription_inactive'].includes(event?.toLowerCase())) {
+            await db.query('UPDATE users SET active = 0, last_payment_status = $1 WHERE email = $2', ['CANCELED', email]);
+            console.log(`Kirvano: User ${email} access blocked (Canceled).`);
+        }
+        else if (['sale_refunded', 'order_refunded', 'refunded'].includes(event?.toLowerCase())) {
+            await db.query('UPDATE users SET active = 0, last_payment_status = $1 WHERE email = $2', ['REFUNDED', email]);
+            console.log(`Kirvano: User ${email} access blocked (Refunded).`);
+        }
+
+        res.json({ message: 'Kirvano event processed' });
+    } catch (error) {
+        console.error('Kirvano Webhook error:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -345,10 +399,13 @@ app.get('/api/data', authenticateToken, async (req: any, res: any) => {
         );
         const closings = await db.query('SELECT * FROM closings WHERE user_id = $1 ORDER BY date DESC', [userId]);
 
+        const userResult = await db.query('SELECT active, expiration_date as "expirationDate", last_payment_status as "lastPaymentStatus" FROM users WHERE id = $1', [userId]);
+
         res.json({
             transactions: transactions.rows,
             accounts: accounts.rows,
-            closings: closings.rows
+            closings: closings.rows,
+            userStatus: userResult.rows[0]
         });
     } catch (error) {
         console.error('Fetch data error:', error);

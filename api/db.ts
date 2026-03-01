@@ -45,6 +45,7 @@ export async function initDB() {
           role TEXT DEFAULT 'user',
           active INTEGER DEFAULT 1,
           expiration_date TIMESTAMP,
+          last_payment_status TEXT,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 

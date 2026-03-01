@@ -14,6 +14,7 @@ import { Card, Button } from '../components/ui';
 import { TransactionModal, AccountModal, ClosingModal } from '../components/dashboard/DashboardModals';
 import { SettingsModule } from '../components/dashboard/SettingsModule';
 import { ReportsModule } from '../components/dashboard/ReportsModule';
+import { SubscriptionWall } from '../components/dashboard/SubscriptionWall';
 
 export default function HomeDashboard() {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ export default function HomeDashboard() {
     filteredTransactions, stats, loading,
     handleAddTransaction, handleUpdateTransaction, handleDeleteTransaction,
     handleAddAccount, handleUpdateAccount, handleDeleteAccount, handleToggleAccountStatus,
-    handleAddClosing
+    handleAddClosing, userStatus
   } = useDashboardData();
 
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -191,8 +192,21 @@ export default function HomeDashboard() {
     }
   };
 
+  const isAccessBlocked = userStatus && (
+    userStatus.active === 0 ||
+    (userStatus.expirationDate && new Date(userStatus.expirationDate) < new Date())
+  );
+
   return (
     <div className={cn("h-screen flex flex-col md:flex-row font-sans overflow-hidden transition-colors duration-300", darkMode ? "dark bg-[#121212] text-gray-100" : "bg-[#f8fafc] text-gray-800")}>
+
+      {/* Subscription Wall Overlay */}
+      {isAccessBlocked && (
+        <SubscriptionWall
+          status={userStatus?.lastPaymentStatus || 'EXPIRED'}
+          onLogout={handleLogout}
+        />
+      )}
 
       {/* Sidebar for Desktop / Menu for Mobile */}
       <aside className={cn(
