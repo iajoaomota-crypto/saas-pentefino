@@ -6,7 +6,7 @@ const Welcome: React.FC = () => {
     const navigate = useNavigate();
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+        <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4 overflow-y-auto pt-10 pb-10">
             <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100 flex flex-col">
                 <div className="bg-[#00d26a] p-8 flex flex-col items-center text-white relative overflow-hidden">
                     {/* Background decorations */}
@@ -67,7 +67,7 @@ const Welcome: React.FC = () => {
                         </div>
 
                         <button
-                            onClick={() => navigate('/login')}
+                            onClick={() => window.location.href = 'https://pentefino.vercel.app'}
                             className="w-full bg-[#00d26a] hover:bg-[#00b55c] text-white py-4 rounded-2xl font-black uppercase tracking-widest transition-all shadow-lg shadow-[#00d26a]/30 flex items-center justify-center gap-3 active:scale-[0.98] group"
                         >
                             Acessar Sistema Agora
