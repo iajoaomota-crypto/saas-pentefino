@@ -26,8 +26,14 @@ export default function HomeDashboard() {
     filteredTransactions, stats, loading,
     handleAddTransaction, handleUpdateTransaction, handleDeleteTransaction,
     handleAddAccount, handleUpdateAccount, handleDeleteAccount, handleToggleAccountStatus,
-    handleAddClosing, userStatus
+    handleAddClosing, userStatus, accounts
   } = useDashboardData();
+
+  useEffect(() => {
+    if (!loading && accounts.length > 0 && activeTab === 'dashboard') {
+      NotificationService.checkAndNotifyDueAccounts(accounts);
+    }
+  }, [accounts, loading, activeTab]);
 
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
