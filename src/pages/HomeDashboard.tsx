@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, ArrowUpCircle, ArrowDownCircle, DollarSign, Calendar, BarChart3, FileText, Settings, Menu, X, Scissors, Wifi, WifiOff, Plus, Shield
@@ -15,6 +15,7 @@ import { TransactionModal, AccountModal, ClosingModal } from '../components/dash
 import { SettingsModule } from '../components/dashboard/SettingsModule';
 import { ReportsModule } from '../components/dashboard/ReportsModule';
 import { SubscriptionWall } from '../components/dashboard/SubscriptionWall';
+import { NotificationService } from '../utils/notificationService';
 
 export default function HomeDashboard() {
   const navigate = useNavigate();
@@ -26,18 +27,18 @@ export default function HomeDashboard() {
     filteredTransactions, stats, loading,
     handleAddTransaction, handleUpdateTransaction, handleDeleteTransaction,
     handleAddAccount, handleUpdateAccount, handleDeleteAccount, handleToggleAccountStatus,
-    handleAddClosing, userStatus, accounts
+    handleAddClosing, userStatus
   } = useDashboardData();
+
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
     if (!loading && accounts.length > 0 && activeTab === 'dashboard') {
       NotificationService.checkAndNotifyDueAccounts(accounts);
     }
   }, [accounts, loading, activeTab]);
-
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAccountModal, setShowAccountModal] = useState(false);
