@@ -49,8 +49,8 @@ const Welcome: React.FC = () => {
                         </div>
 
                         <div className="bg-amber-50 rounded-xl p-3 border border-amber-100">
-                            <p className="text-amber-800 text-[9px] sm:text-[11px] font-semibold leading-tight">
-                                ✨ Dica: Altere sua senha após o primeiro acesso no seu perfil.
+                            <p className="text-amber-800 text-[9px] sm:text-[11px] font-semibold leading-relaxed text-center">
+                                ✨ <strong>Dica:</strong> Você pode alterar sua senha a qualquer momento no menu de <strong>Configurações</strong> após o login.
                             </p>
                         </div>
 
