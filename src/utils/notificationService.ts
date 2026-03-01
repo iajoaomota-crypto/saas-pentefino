@@ -30,14 +30,14 @@ export const NotificationService = {
         navigator.serviceWorker.ready.then((registration) => {
             registration.showNotification(title, {
                 body,
-                icon: '/pwa-192x192.png',
-                badge: '/favicon.svg',
+                icon: '/logo-v5.png',
+                badge: '/favicon-v5.png',
                 vibrate: [200, 100, 200],
                 tag: 'bill-reminder-' + Date.now(),
                 data: {
                     url: window.location.origin
                 }
-            });
+            } as any);
         });
     },
 
