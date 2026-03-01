@@ -343,30 +343,35 @@ app.post('/api/webhooks/kirvano', async (req, res) => {
         payload.data?.buyer?.email ||
         payload.customer?.email;
 
-    if (!email) {
-        console.error('Kirvano Webhook Error: Email not found');
-        return res.status(400).json({ error: 'Email not found in Kirvano payload' });
-    }
-
     try {
+        if (!email) {
+            console.error('Kirvano Webhook Error: Email not found in payload');
+            return res.status(400).json({ error: 'Email not found in Kirvano payload' });
+        }
+
         const isRenewalOrApproval = [
             'order_approved', 'sale_approved', 'purchase_approved', 'paid',
             'subscription_renewed', 'subscription_renew', 'order_renewed'
         ].includes(event?.toLowerCase());
+
+        console.log(`Processing event: ${event} for ${email}. IsRenewalOrApproval: ${isRenewalOrApproval}`);
 
         if (isRenewalOrApproval) {
             const expiration = new Date();
             expiration.setDate(expiration.getDate() + 30);
             const expStr = expiration.toISOString();
 
+            console.log(`Updating/Creating user ${email} with expiration ${expStr}`);
+
             const userResult = await db.query('SELECT id FROM users WHERE email = $1', [email]);
             const user = userResult.rows[0];
 
             if (user) {
+                console.log(`Found existing user ID: ${user.id}. Updating...`);
                 await db.query('UPDATE users SET active = 1, expiration_date = $1, last_payment_status = $2 WHERE id = $3', [expStr, 'APPROVED', user.id]);
                 console.log(`Kirvano: User ${email} access granted/extended (Event: ${event}).`);
             } else {
-                // Using email handles username uniqueness better and is easier to remember
+                console.log(`User not found. Creating new user for ${email}...`);
                 const username = email;
                 const defaultPassword = bcrypt.hashSync('pente123', 10);
                 await db.query('INSERT INTO users (username, name, email, password, role, active, expiration_date, last_payment_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
@@ -375,18 +380,28 @@ app.post('/api/webhooks/kirvano', async (req, res) => {
             }
         }
         else if (['subscription_canceled', 'subscription_cancelled', 'subscription_inactive'].includes(event?.toLowerCase())) {
+            console.log(`Handling cancellation for ${email}`);
             await db.query('UPDATE users SET active = 0, last_payment_status = $1 WHERE email = $2', ['CANCELED', email]);
             console.log(`Kirvano: User ${email} access blocked (Canceled).`);
         }
         else if (['sale_refunded', 'order_refunded', 'refunded'].includes(event?.toLowerCase())) {
+            console.log(`Handling refund for ${email}`);
             await db.query('UPDATE users SET active = 0, last_payment_status = $1 WHERE email = $2', ['REFUNDED', email]);
             console.log(`Kirvano: User ${email} access blocked (Refunded).`);
+        } else {
+            console.log(`Event ${event} not handled by business logic.`);
         }
 
-        res.json({ message: 'Kirvano event processed' });
-    } catch (error) {
-        console.error('Kirvano Webhook error:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        res.json({ message: 'Kirvano event processed successfully' });
+    } catch (error: any) {
+        console.error('CRITICAL: Kirvano Webhook error detail:', {
+            message: error.message,
+            stack: error.stack,
+            code: error.code,
+            payloadEvent: event,
+            payloadEmail: email
+        });
+        res.status(500).json({ error: 'Internal server error', detail: error.message });
     }
 });
 

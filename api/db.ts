@@ -99,6 +99,8 @@ export async function initDB() {
         console.log('Master user created.');
       }
 
+      await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS last_payment_status TEXT;`);
+
       console.log('Database tables initialized/verified.');
       isInitialized = true;
     } catch (err) {
