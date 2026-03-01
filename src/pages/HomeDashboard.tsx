@@ -217,7 +217,7 @@ export default function HomeDashboard() {
         <div className="p-6 flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-white dark:bg-white/10 rounded-xl flex items-center justify-center overflow-hidden border border-gray-100 dark:border-white/10 shadow-sm transition-all hover:scale-105">
-              <img src="/logo.svg" alt="Logo Pente Fino" className="w-full h-full object-contain p-1.5" />
+              <img src="/logo.svg" alt="Logo Pente Fino" className="w-full h-full object-contain p-1" />
             </div>
             <div><span className="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight">Pente Fino</span></div>
           </div>
