@@ -14,16 +14,26 @@ interface DashboardChartsProps {
 }
 
 export const DashboardCharts: React.FC<DashboardChartsProps> = ({ transactions = [], darkMode }) => {
+    // Helper to format date consistent with transactions (DD/MM/YYYY)
+    const formatDate = (date: Date) => {
+        const d = date.getDate().toString().padStart(2, '0');
+        const m = (date.getMonth() + 1).toString().padStart(2, '0');
+        const y = date.getFullYear();
+        return `${d}/${m}/${y}`;
+    };
+
     // Process Area Chart data (Flow)
     const chartData = React.useMemo(() => {
         const last7Days = Array.from({ length: 7 }, (_, i) => {
             const d = new Date();
+            d.setHours(0, 0, 0, 0);
             d.setDate(d.getDate() - (6 - i));
-            return d.toLocaleDateString('pt-BR');
+            return d;
         });
 
-        return last7Days.map(date => {
-            const dayTransactions = (transactions || []).filter(t => t.date === date);
+        return last7Days.map(dObj => {
+            const dateStr = formatDate(dObj);
+            const dayTransactions = (transactions || []).filter(t => t.date === dateStr);
             const receita = sumAmounts(dayTransactions
                 .filter(t => t.type === 'income')
                 .map(t => t.amount));
@@ -32,7 +42,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ transactions =
                 .map(t => t.amount));
 
             return {
-                name: date.split('/')[0] + '/' + date.split('/')[1],
+                name: dateStr.split('/')[0] + '/' + dateStr.split('/')[1],
                 receita,
                 despesa
             };
@@ -60,7 +70,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ transactions =
         const data: Record<string, number> = {};
         incomes.forEach(t => {
             const label = REVENUE_CATEGORIES.find(c => c.id === t.revenueType)?.label || 'Outros';
-            data[label] = (data[label] || 0) + t.amount;
+            data[label] = (data[label] || 0) + (t.amount || 0);
         });
 
         const colors = [BRAND_COLORS.primary, '#3b82f6', '#8b5cf6', '#f59e0b'];
@@ -78,16 +88,16 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ transactions =
 
         const data: Record<string, number> = {};
         expenses.forEach(t => {
-            const label = t.expenseType || 'Não Classificado';
-            data[label] = (data[label] || 0) + t.amount;
+            // Support both 'professional'/'personal' (internal) and 'Empresa'/'Pessoal' (display)
+            const type = t.expenseType || 'Empresa';
+            const label = (type.toLowerCase() === 'professional' || type === 'Empresa') ? 'Empresa' : 'Pessoal';
+            data[label] = (data[label] || 0) + (t.amount || 0);
         });
 
-        const colors = [BRAND_COLORS.danger, '#f97316', '#64748b'];
-        return Object.entries(data).map(([name, value], i) => ({
-            name,
-            value,
-            color: colors[i % colors.length]
-        }));
+        return [
+            { name: 'Empresa', value: data['Empresa'] || 0, color: BRAND_COLORS.danger },
+            { name: 'Pessoal', value: data['Pessoal'] || 0, color: '#f97316' }
+        ].filter(d => d.value > 0);
     }, [transactions]);
 
     // 4. Payment Methods Distribution
@@ -97,18 +107,18 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ transactions =
 
         const data: Record<string, number> = {};
         incomes.forEach(t => {
-            const label = t.category || 'Outros';
-            data[label] = (data[label] || 0) + t.amount;
+            const label = t.category || 'PIX';
+            data[label] = (data[label] || 0) + (t.amount || 0);
         });
 
         return Object.entries(data).map(([name, value]) => {
-            const method = PAYMENT_METHODS.find(m => m.label === name);
+            const method = PAYMENT_METHODS.find(m => m.label.toLowerCase() === name.toLowerCase());
             return {
                 name,
                 value,
                 color: method?.color || '#94a3b8'
             };
-        });
+        }).filter(d => d.value > 0);
     }, [transactions]);
 
     // 5. Professional Performance (Top Barbers)
@@ -119,13 +129,14 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ transactions =
         const data: Record<string, number> = {};
         incomes.forEach(t => {
             const label = t.barber!;
-            data[label] = (data[label] || 0) + t.amount;
+            data[label] = (data[label] || 0) + (t.amount || 0);
         });
 
         return Object.entries(data)
             .map(([name, value]) => ({ name, value, color: BRAND_COLORS.primary }))
             .sort((a, b) => b.value - a.value)
-            .slice(0, 5);
+            .slice(0, 5)
+            .filter(d => d.value > 0);
     }, [transactions]);
 
     const renderPieChart = (title: string, data: any[]) => (
