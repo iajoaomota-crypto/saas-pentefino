@@ -14,7 +14,7 @@ interface DashboardChartsProps {
 }
 
 export const DashboardCharts: React.FC<DashboardChartsProps> = ({ transactions = [], darkMode }) => {
-    // Process chart data (Flow)
+    // Process Area Chart data (Flow)
     const chartData = React.useMemo(() => {
         const last7Days = Array.from({ length: 7 }, (_, i) => {
             const d = new Date();
@@ -39,31 +39,105 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ transactions =
         });
     }, [transactions]);
 
-    // Process category distribution
-    const categoryData = React.useMemo(() => {
-        if (!transactions || transactions.length === 0) return [];
+    // 1. Overall Balance (Income vs Expense)
+    const overallData = React.useMemo(() => {
+        const income = sumAmounts(transactions.filter(t => t.type === 'income').map(t => t.amount));
+        const expense = sumAmounts(transactions.filter(t => t.type === 'expense').map(t => t.amount));
 
-        const categories = [...new Set(transactions.map(t => t.category))];
-        return categories.map(cat => {
-            const value = sumAmounts(transactions
-                .filter(t => t.category === cat)
-                .map(t => t.amount));
+        if (income === 0 && expense === 0) return [];
 
-            // Find color from payment methods or defaults
-            const method = PAYMENT_METHODS.find(m => m.label === cat);
-
-            return {
-                name: cat,
-                value,
-                color: method?.color || BRAND_COLORS.primary
-            };
-        }).filter(c => c.value > 0);
+        return [
+            { name: 'Receitas', value: income, color: BRAND_COLORS.primary },
+            { name: 'Despesas', value: expense, color: BRAND_COLORS.danger }
+        ].filter(d => d.value > 0);
     }, [transactions]);
 
+    // 2. Revenue Distribution (Services vs Products vs Others)
+    const revenueTypeData = React.useMemo(() => {
+        const incomes = transactions.filter(t => t.type === 'income');
+        if (incomes.length === 0) return [];
+
+        const data: Record<string, number> = {};
+        incomes.forEach(t => {
+            const label = REVENUE_CATEGORIES.find(c => c.id === t.revenueType)?.label || 'Outros';
+            data[label] = (data[label] || 0) + t.amount;
+        });
+
+        const colors = [BRAND_COLORS.primary, '#3b82f6', '#8b5cf6', '#f59e0b'];
+        return Object.entries(data).map(([name, value], i) => ({
+            name,
+            value,
+            color: colors[i % colors.length]
+        }));
+    }, [transactions]);
+
+    // 3. Expense Distribution (Professional vs Personal)
+    const expenseTypeData = React.useMemo(() => {
+        const expenses = transactions.filter(t => t.type === 'expense');
+        if (expenses.length === 0) return [];
+
+        const data: Record<string, number> = {};
+        expenses.forEach(t => {
+            const label = t.expenseType || 'Não Classificado';
+            data[label] = (data[label] || 0) + t.amount;
+        });
+
+        const colors = [BRAND_COLORS.danger, '#f97316', '#64748b'];
+        return Object.entries(data).map(([name, value], i) => ({
+            name,
+            value,
+            color: colors[i % colors.length]
+        }));
+    }, [transactions]);
+
+    const renderPieChart = (title: string, data: any[]) => (
+        <Card className="p-6 bg-white dark:bg-[#1E1E1E] border-none shadow-sm flex flex-col items-center">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-6 text-center">{title}</h3>
+            <div className="h-[220px] w-full">
+                {data.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                            <Pie
+                                data={data}
+                                innerRadius={60}
+                                outerRadius={80}
+                                paddingAngle={5}
+                                dataKey="value"
+                            >
+                                {data.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={entry.color} />
+                                ))}
+                            </Pie>
+                            <Tooltip
+                                contentStyle={{
+                                    backgroundColor: darkMode ? '#1E1E1E' : '#fff',
+                                    border: 'none',
+                                    borderRadius: '12px',
+                                    fontWeight: 'bold',
+                                    fontSize: '12px',
+                                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                                }}
+                                formatter={(value: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)}
+                            />
+                            <Legend
+                                verticalAlign="bottom"
+                                height={36}
+                                iconType="circle"
+                                formatter={(value) => <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">{value}</span>}
+                            />
+                        </PieChart>
+                    </ResponsiveContainer>
+                ) : (
+                    <div className="h-full flex items-center justify-center text-gray-400 text-xs italic">Sem dados suficientes</div>
+                )}
+            </div>
+        </Card>
+    );
+
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="space-y-6">
             <Card className="p-6 bg-white dark:bg-[#1E1E1E] border-none shadow-sm">
-                <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-6">Fluxo de Caixa</h3>
+                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-6">Fluxo de Caixa (Últimos 7 dias)</h3>
                 <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={chartData}>
@@ -73,8 +147,8 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ transactions =
                                     <stop offset="95%" stopColor={BRAND_COLORS.primary} stopOpacity={0} />
                                 </linearGradient>
                                 <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.1} />
-                                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+                                    <stop offset="5%" stopColor={BRAND_COLORS.danger} stopOpacity={0.1} />
+                                    <stop offset="95%" stopColor={BRAND_COLORS.danger} stopOpacity={0} />
                                 </linearGradient>
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={darkMode ? "#333" : "#f0f0f0"} />
@@ -82,13 +156,13 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ transactions =
                                 dataKey="name"
                                 axisLine={false}
                                 tickLine={false}
-                                tick={{ fill: '#9ca3af', fontSize: 12 }}
+                                tick={{ fill: '#9ca3af', fontSize: 10, fontWeight: 'bold' }}
                                 dy={10}
                             />
                             <YAxis
                                 axisLine={false}
                                 tickLine={false}
-                                tick={{ fill: '#9ca3af', fontSize: 12 }}
+                                tick={{ fill: '#9ca3af', fontSize: 10, fontWeight: 'bold' }}
                                 dy={0}
                                 tickFormatter={(value) => `R$ ${value}`}
                             />
@@ -99,6 +173,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ transactions =
                                     borderRadius: '12px',
                                     boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
                                 }}
+                                formatter={(value: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)}
                             />
                             <Area
                                 type="monotone"
@@ -111,7 +186,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ transactions =
                             <Area
                                 type="monotone"
                                 dataKey="despesa"
-                                stroke="#ef4444"
+                                stroke={BRAND_COLORS.danger}
                                 strokeWidth={3}
                                 fillOpacity={1}
                                 fill="url(#colorExpense)"
@@ -121,35 +196,11 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ transactions =
                 </div>
             </Card>
 
-            <Card className="p-6 bg-white dark:bg-[#1E1E1E] border-none shadow-sm">
-                <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-6">Distribuição por Categoria</h3>
-                <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                            <Pie
-                                data={categoryData}
-                                innerRadius={80}
-                                outerRadius={100}
-                                paddingAngle={5}
-                                dataKey="value"
-                            >
-                                {categoryData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={entry.color || BRAND_COLORS.primary} />
-                                ))}
-                            </Pie>
-                            <Tooltip
-                                contentStyle={{
-                                    backgroundColor: darkMode ? '#1E1E1E' : '#fff',
-                                    border: 'none',
-                                    borderRadius: '12px',
-                                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
-                                }}
-                            />
-                            <Legend verticalAlign="bottom" height={36} />
-                        </PieChart>
-                    </ResponsiveContainer>
-                </div>
-            </Card>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {renderPieChart("Balanço Geral", overallData)}
+                {renderPieChart("Distribuição de Receitas", revenueTypeData)}
+                {renderPieChart("Filtro Despesas", expenseTypeData)}
+            </div>
         </div>
     );
 };
