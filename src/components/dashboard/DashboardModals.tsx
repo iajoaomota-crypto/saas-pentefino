@@ -10,10 +10,11 @@ interface TransactionModalProps {
     onSubmit: (t: Omit<Transaction, 'id'>) => void;
     darkMode: boolean;
     editingTransaction?: Transaction | null;
+    defaultType?: 'income' | 'expense';
 }
 
 export const TransactionModal: React.FC<TransactionModalProps> = ({
-    isOpen, onClose, onSubmit, darkMode, editingTransaction
+    isOpen, onClose, onSubmit, darkMode, editingTransaction, defaultType = 'income'
 }) => {
     const [desc, setDesc] = useState('');
     const [amount, setAmount] = useState('');
@@ -37,14 +38,14 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         } else {
             setDesc('');
             setAmount('');
-            setType('income');
+            setType(defaultType);
             setCategory('PIX');
             setDate(new Date().toISOString().split('T')[0]);
             setRevenueType('services');
             setExpenseType('Empresa');
             setBarber('');
         }
-    }, [editingTransaction, isOpen]);
+    }, [editingTransaction, isOpen, defaultType]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();

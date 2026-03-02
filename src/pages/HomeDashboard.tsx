@@ -290,7 +290,13 @@ export default function HomeDashboard() {
             </div>
             <h1 className="font-bold text-gray-800 dark:text-white uppercase text-[10px] tracking-widest">{sidebarItems.find(i => i.id === activeTab)?.label}</h1>
           </div>
-          <button onClick={() => setShowAddModal(true)} className="w-10 h-10 bg-[#00d26a] text-white rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-transform">
+          <button
+            onClick={() => {
+              setEditingTransaction(null);
+              setShowAddModal(true);
+            }}
+            className="w-10 h-10 bg-[#00d26a] text-white rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-transform"
+          >
             <Plus size={24} />
           </button>
         </div>
@@ -376,6 +382,7 @@ export default function HomeDashboard() {
           onSubmit={editingTransaction ? (t) => handleUpdateTransaction(editingTransaction.id, t) : handleAddTransaction}
           darkMode={darkMode}
           editingTransaction={editingTransaction}
+          defaultType={activeTab === 'receitas' ? 'income' : activeTab === 'despesas' ? 'expense' : 'income'}
         />
         <AccountModal
           isOpen={showAccountModal}
