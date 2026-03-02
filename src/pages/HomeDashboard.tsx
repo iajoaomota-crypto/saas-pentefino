@@ -128,6 +128,10 @@ export default function HomeDashboard() {
                   darkMode={darkMode}
                   onDelete={handleDeleteTransaction}
                   onEdit={(t) => { setEditingTransaction(t); setShowAddModal(true); }}
+                  subTab={subTab}
+                  setSubTab={setSubTab}
+                  searchTerm={searchTerm}
+                  setSearchTerm={setSearchTerm}
                 />
               </div>
             </div>
@@ -237,7 +241,14 @@ export default function HomeDashboard() {
         </div>
         <nav className="px-4 flex-1 space-y-1">
           {sidebarItems.map((item) => (
-            <button key={item.id} onClick={() => { setActiveTab(item.id); setIsMobileMenuOpen(false); }} className={cn("w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all text-left", activeTab === item.id ? "bg-[#00d26a] text-white shadow-lg" : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5")}>
+            <button key={item.id} onClick={() => {
+              setActiveTab(item.id);
+              setIsMobileMenuOpen(false);
+              // Reset sub-tabs to meaningful defaults
+              if (item.id === 'receitas') setSubTab('services');
+              if (item.id === 'despesas') setSubTab('professional');
+              setSearchTerm(''); // Optional: clear search when changing tabs
+            }} className={cn("w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all text-left", activeTab === item.id ? "bg-[#00d26a] text-white shadow-lg" : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5")}>
               <item.icon size={18} /> <span className="text-sm">{item.label}</span>
             </button>
           ))}

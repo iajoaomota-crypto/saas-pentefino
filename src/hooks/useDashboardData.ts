@@ -93,8 +93,25 @@ export function useDashboardData() {
             const now = new Date();
             now.setHours(0, 0, 0, 0);
 
-            // Search term filter
-            if (searchTerm && !t.desc.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+            // Search term filter - Expand to desc, barber, and category
+            if (searchTerm) {
+                const term = searchTerm.toLowerCase();
+                const matchesDesc = t.desc.toLowerCase().includes(term);
+                const matchesBarber = t.barber?.toLowerCase().includes(term);
+                const matchesCategory = t.category?.toLowerCase().includes(term);
+                if (!matchesDesc && !matchesBarber && !matchesCategory) return false;
+            }
+
+            // Sub-tab filtering (Services/Products for income, Pro/Personal for expense)
+            if (subTab) {
+                if (t.type === 'income') {
+                    if (subTab === 'services' && t.revenueType !== 'services') return false;
+                    if (subTab === 'products' && t.revenueType !== 'products') return false;
+                } else if (t.type === 'expense') {
+                    if (subTab === 'professional' && t.expenseType !== 'professional') return false;
+                    if (subTab === 'personal' && t.expenseType !== 'personal') return false;
+                }
+            }
 
             if (dateFilter === 'today') {
                 return tDate.getTime() === now.getTime();
