@@ -70,7 +70,8 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ transactions =
         const data: Record<string, number> = {};
         incomes.forEach(t => {
             const label = REVENUE_CATEGORIES.find(c => c.id === t.revenueType)?.label || 'Outros';
-            data[label] = (data[label] || 0) + (t.amount || 0);
+            const val = typeof t.amount === 'string' ? parseFloat(t.amount.replace(',', '.')) : (t.amount || 0);
+            data[label] = (data[label] || 0) + (isNaN(val) ? 0 : val);
         });
 
         const colors = [BRAND_COLORS.primary, '#3b82f6', '#8b5cf6', '#f59e0b'];
@@ -88,10 +89,10 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ transactions =
 
         const data: Record<string, number> = {};
         expenses.forEach(t => {
-            // Support both 'professional'/'personal' (internal) and 'Empresa'/'Pessoal' (display)
             const type = t.expenseType || 'Empresa';
             const label = (type.toLowerCase() === 'professional' || type === 'Empresa') ? 'Empresa' : 'Pessoal';
-            data[label] = (data[label] || 0) + (t.amount || 0);
+            const val = typeof t.amount === 'string' ? parseFloat(t.amount.replace(',', '.')) : (t.amount || 0);
+            data[label] = (data[label] || 0) + (isNaN(val) ? 0 : val);
         });
 
         return [
@@ -108,7 +109,8 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ transactions =
         const data: Record<string, number> = {};
         incomes.forEach(t => {
             const label = t.category || 'PIX';
-            data[label] = (data[label] || 0) + (t.amount || 0);
+            const val = typeof t.amount === 'string' ? parseFloat(t.amount.replace(',', '.')) : (t.amount || 0);
+            data[label] = (data[label] || 0) + (isNaN(val) ? 0 : val);
         });
 
         return Object.entries(data).map(([name, value]) => {
@@ -129,7 +131,8 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ transactions =
         const data: Record<string, number> = {};
         incomes.forEach(t => {
             const label = t.barber!;
-            data[label] = (data[label] || 0) + (t.amount || 0);
+            const val = typeof t.amount === 'string' ? parseFloat(t.amount.replace(',', '.')) : (t.amount || 0);
+            data[label] = (data[label] || 0) + (isNaN(val) ? 0 : val);
         });
 
         return Object.entries(data)
