@@ -24,7 +24,7 @@ export default function HomeDashboard() {
     dateFilter, setDateFilter, startDate, setStartDate, endDate, setEndDate,
     searchTerm, setSearchTerm, subTab, setSubTab, accountsTab, setAccountsTab,
     commissionRate, setCommissionRate,
-    filteredTransactions, stats, loading,
+    filteredTransactions, periodTransactions, stats, loading,
     handleAddTransaction, handleUpdateTransaction, handleDeleteTransaction,
     handleAddAccount, handleUpdateAccount, handleDeleteAccount, handleToggleAccountStatus,
     handleAddClosing, userStatus
