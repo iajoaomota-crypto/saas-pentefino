@@ -97,7 +97,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ transactions =
 
         return [
             { name: 'Empresa', value: data['Empresa'] || 0, color: BRAND_COLORS.danger },
-            { name: 'Pessoal', value: data['Pessoal'] || 0, color: '#f97316' }
+            { name: 'Pessoal', value: data['Pessoal'] || 0, color: '#3b82f6' }
         ].filter(d => d.value > 0);
     }, [transactions]);
 
