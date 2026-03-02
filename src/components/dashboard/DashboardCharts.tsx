@@ -90,6 +90,44 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ transactions =
         }));
     }, [transactions]);
 
+    // 4. Payment Methods Distribution
+    const paymentMethodData = React.useMemo(() => {
+        const incomes = transactions.filter(t => t.type === 'income');
+        if (incomes.length === 0) return [];
+
+        const data: Record<string, number> = {};
+        incomes.forEach(t => {
+            const label = t.category || 'Outros';
+            data[label] = (data[label] || 0) + t.amount;
+        });
+
+        return Object.entries(data).map(([name, value]) => {
+            const method = PAYMENT_METHODS.find(m => m.label === name);
+            return {
+                name,
+                value,
+                color: method?.color || '#94a3b8'
+            };
+        });
+    }, [transactions]);
+
+    // 5. Professional Performance (Top Barbers)
+    const barberPerformanceData = React.useMemo(() => {
+        const incomes = transactions.filter(t => t.type === 'income' && t.barber);
+        if (incomes.length === 0) return [];
+
+        const data: Record<string, number> = {};
+        incomes.forEach(t => {
+            const label = t.barber!;
+            data[label] = (data[label] || 0) + t.amount;
+        });
+
+        return Object.entries(data)
+            .map(([name, value]) => ({ name, value, color: BRAND_COLORS.primary }))
+            .sort((a, b) => b.value - a.value)
+            .slice(0, 5);
+    }, [transactions]);
+
     const renderPieChart = (title: string, data: any[]) => (
         <Card className="p-6 bg-white dark:bg-[#1E1E1E] border-none shadow-sm flex flex-col items-center">
             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-6 text-center">{title}</h3>
@@ -196,10 +234,12 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ transactions =
                 </div>
             </Card>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {renderPieChart("Balanço Geral", overallData)}
-                {renderPieChart("Distribuição de Receitas", revenueTypeData)}
-                {renderPieChart("Filtro Despesas", expenseTypeData)}
+                {renderPieChart("Receitas (Serviços/Produtos)", revenueTypeData)}
+                {renderPieChart("Despesas (Pro/Pessoal)", expenseTypeData)}
+                {renderPieChart("Meios de Pagamento", paymentMethodData)}
+                {renderPieChart("Top Profissionais", barberPerformanceData)}
             </div>
         </div>
     );

@@ -91,7 +91,7 @@ export default function HomeDashboard() {
             <MetricSection stats={stats} darkMode={darkMode} />
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2">
-                <DashboardCharts transactions={filteredTransactions} darkMode={darkMode} />
+                <DashboardCharts transactions={periodTransactions} darkMode={darkMode} />
               </div>
               <div className="space-y-8">
                 {/* Pending Accounts Section */}

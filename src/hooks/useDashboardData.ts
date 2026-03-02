@@ -86,32 +86,13 @@ export function useDashboardData() {
     }, [commissionRate]);
 
     // Enhanced Filtering Logic
-    const filteredTransactions = useMemo(() => {
+    // Base filtering (only date)
+    const periodTransactions = useMemo(() => {
         return transactions.filter(t => {
             const [d, m, y] = t.date.split('/').map(Number);
             const tDate = new Date(y, m - 1, d);
             const now = new Date();
             now.setHours(0, 0, 0, 0);
-
-            // Search term filter - Expand to desc, barber, and category
-            if (searchTerm) {
-                const term = searchTerm.toLowerCase();
-                const matchesDesc = t.desc.toLowerCase().includes(term);
-                const matchesBarber = t.barber?.toLowerCase().includes(term);
-                const matchesCategory = t.category?.toLowerCase().includes(term);
-                if (!matchesDesc && !matchesBarber && !matchesCategory) return false;
-            }
-
-            // Sub-tab filtering (Services/Products for income, Pro/Personal for expense)
-            if (subTab) {
-                if (t.type === 'income') {
-                    if (subTab === 'services' && t.revenueType !== 'services') return false;
-                    if (subTab === 'products' && t.revenueType !== 'products') return false;
-                } else if (t.type === 'expense') {
-                    if (subTab === 'Empresa' && t.expenseType !== 'Empresa') return false;
-                    if (subTab === 'Pessoal' && t.expenseType !== 'Pessoal') return false;
-                }
-            }
 
             if (dateFilter === 'today') {
                 return tDate.getTime() === now.getTime();
@@ -137,17 +118,42 @@ export function useDashboardData() {
                 return tDate >= monthStart && tDate <= monthEnd;
             }
             if (dateFilter === 'custom' && startDate && endDate) {
-                // Ensure dates are parsed as local YYYY-MM-DD
                 const [sY, sM, sD] = startDate.split('-').map(Number);
                 const [eY, eM, eD] = endDate.split('-').map(Number);
                 const start = new Date(sY, sM - 1, sD);
                 const end = new Date(eY, eM - 1, eD);
-
                 return tDate.getTime() >= start.getTime() && tDate.getTime() <= end.getTime();
             }
             return true;
         });
-    }, [transactions, dateFilter, startDate, endDate, searchTerm, subTab]);
+    }, [transactions, dateFilter, startDate, endDate]);
+
+    // UI-specific filtering (search + subtabs)
+    const filteredTransactions = useMemo(() => {
+        return periodTransactions.filter(t => {
+            // Search term filter - Expand to desc, barber, and category
+            if (searchTerm) {
+                const term = searchTerm.toLowerCase();
+                const matchesDesc = t.desc.toLowerCase().includes(term);
+                const matchesBarber = t.barber?.toLowerCase().includes(term);
+                const matchesCategory = t.category?.toLowerCase().includes(term);
+                if (!matchesDesc && !matchesBarber && !matchesCategory) return false;
+            }
+
+            // Sub-tab filtering (Services/Products for income, Pro/Personal for expense)
+            if (subTab) {
+                if (t.type === 'income') {
+                    if (subTab === 'services' && t.revenueType !== 'services') return false;
+                    if (subTab === 'products' && t.revenueType !== 'products') return false;
+                } else if (t.type === 'expense') {
+                    if (subTab === 'Empresa' && t.expenseType !== 'Empresa') return false;
+                    if (subTab === 'Pessoal' && t.expenseType !== 'Pessoal') return false;
+                }
+            }
+
+            return true;
+        });
+    }, [periodTransactions, searchTerm, subTab]);
 
     const stats = useMemo(() => {
         const calculateStats = (filteredList: Transaction[]) => {
@@ -449,7 +455,7 @@ export function useDashboardData() {
         dateFilter, setDateFilter, startDate, setStartDate, endDate, setEndDate,
         searchTerm, setSearchTerm, subTab, setSubTab, accountsTab, setAccountsTab,
         commissionRate, setCommissionRate,
-        filteredTransactions, stats, userStatus,
+        periodTransactions, filteredTransactions, stats, userStatus,
         handleAddTransaction, handleUpdateTransaction, handleDeleteTransaction,
         handleAddAccount, handleUpdateAccount, handleDeleteAccount, handleToggleAccountStatus,
         handleAddClosing
