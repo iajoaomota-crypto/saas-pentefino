@@ -58,19 +58,19 @@ export const TransactionsModule: React.FC<TransactionsModuleProps> = ({
                     ) : (
                         <>
                             <button
-                                onClick={() => setSubTab('professional')}
+                                onClick={() => setSubTab('Empresa')}
                                 className={cn(
                                     "px-4 py-2 rounded-lg text-xs font-bold transition-all",
-                                    subTab === 'professional' ? "bg-white dark:bg-[#2A2A2A] text-red-500 shadow-sm" : "text-gray-400 hover:text-gray-600"
+                                    subTab === 'Empresa' ? "bg-white dark:bg-[#2A2A2A] text-red-500 shadow-sm" : "text-gray-400 hover:text-gray-600"
                                 )}
                             >
                                 Profissional
                             </button>
                             <button
-                                onClick={() => setSubTab('personal')}
+                                onClick={() => setSubTab('Pessoal')}
                                 className={cn(
                                     "px-4 py-2 rounded-lg text-xs font-bold transition-all",
-                                    subTab === 'personal' ? "bg-white dark:bg-[#2A2A2A] text-red-500 shadow-sm" : "text-gray-400 hover:text-gray-600"
+                                    subTab === 'Pessoal' ? "bg-white dark:bg-[#2A2A2A] text-red-500 shadow-sm" : "text-gray-400 hover:text-gray-600"
                                 )}
                             >
                                 Pessoal

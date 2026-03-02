@@ -108,8 +108,8 @@ export function useDashboardData() {
                     if (subTab === 'services' && t.revenueType !== 'services') return false;
                     if (subTab === 'products' && t.revenueType !== 'products') return false;
                 } else if (t.type === 'expense') {
-                    if (subTab === 'professional' && t.expenseType !== 'professional') return false;
-                    if (subTab === 'personal' && t.expenseType !== 'personal') return false;
+                    if (subTab === 'Empresa' && t.expenseType !== 'Empresa') return false;
+                    if (subTab === 'Pessoal' && t.expenseType !== 'Pessoal') return false;
                 }
             }
 
@@ -147,7 +147,7 @@ export function useDashboardData() {
             }
             return true;
         });
-    }, [transactions, dateFilter, startDate, endDate, searchTerm]);
+    }, [transactions, dateFilter, startDate, endDate, searchTerm, subTab]);
 
     const stats = useMemo(() => {
         const calculateStats = (filteredList: Transaction[]) => {

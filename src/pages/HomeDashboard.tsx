@@ -246,7 +246,7 @@ export default function HomeDashboard() {
               setIsMobileMenuOpen(false);
               // Reset sub-tabs to meaningful defaults
               if (item.id === 'receitas') setSubTab('services');
-              if (item.id === 'despesas') setSubTab('professional');
+              if (item.id === 'despesas') setSubTab('Empresa');
               setSearchTerm(''); // Optional: clear search when changing tabs
             }} className={cn("w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all text-left", activeTab === item.id ? "bg-[#00d26a] text-white shadow-lg" : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5")}>
               <item.icon size={18} /> <span className="text-sm">{item.label}</span>
