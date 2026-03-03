@@ -6,7 +6,7 @@ import {
 import { Card } from '../ui';
 import { cn } from '../../utils';
 import { BRAND_COLORS, REVENUE_CATEGORIES, EXPENSE_CATEGORIES, PAYMENT_METHODS } from '../../constants/config';
-import { sumAmounts } from '../../utils/financialUtils';
+import { sumAmounts, formatCurrency } from '../../utils/financialUtils';
 
 interface DashboardChartsProps {
     transactions: any[];
@@ -142,49 +142,71 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ transactions =
             .filter(d => d.value > 0);
     }, [transactions]);
 
-    const renderPieChart = (title: string, data: any[]) => (
-        <Card className="p-6 bg-white dark:bg-[#1E1E1E] border-none shadow-sm flex flex-col items-center">
-            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-6 text-center">{title}</h3>
-            <div className="h-[220px] w-full">
-                {data.length > 0 ? (
-                    <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                            <Pie
-                                data={data}
-                                innerRadius={60}
-                                outerRadius={80}
-                                paddingAngle={5}
-                                dataKey="value"
-                            >
-                                {data.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={entry.color} />
-                                ))}
-                            </Pie>
-                            <Tooltip
-                                contentStyle={{
-                                    backgroundColor: darkMode ? '#1E1E1E' : '#fff',
-                                    border: 'none',
-                                    borderRadius: '12px',
-                                    fontWeight: 'bold',
-                                    fontSize: '12px',
-                                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
-                                }}
-                                formatter={(value: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)}
-                            />
-                            <Legend
-                                verticalAlign="bottom"
-                                height={36}
-                                iconType="circle"
-                                formatter={(value) => <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">{value}</span>}
-                            />
-                        </PieChart>
-                    </ResponsiveContainer>
-                ) : (
-                    <div className="h-full flex items-center justify-center text-gray-400 text-xs italic">Sem dados suficientes</div>
-                )}
-            </div>
-        </Card>
-    );
+    const renderPieChart = (title: string, data: any[]) => {
+        const total = data.reduce((acc, item) => acc + (item.value || 0), 0);
+
+        return (
+            <Card className="p-6 bg-white dark:bg-[#1E1E1E] border-none shadow-sm flex flex-col items-center">
+                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-6 text-center">{title}</h3>
+                <div className="h-[280px] w-full">
+                    {data.length > 0 ? (
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <Pie
+                                    data={data}
+                                    innerRadius={60}
+                                    outerRadius={80}
+                                    paddingAngle={5}
+                                    dataKey="value"
+                                    isAnimationActive={true}
+                                    stroke="none"
+                                    // Disable expanding segment on click/hover
+                                    activeShape={undefined}
+                                    activeIndex={-1}
+                                >
+                                    {data.map((entry, index) => (
+                                        <Cell
+                                            key={`cell-${index}`}
+                                            fill={entry.color}
+                                            style={{ outline: 'none' }}
+                                        />
+                                    ))}
+                                </Pie>
+                                <Tooltip
+                                    contentStyle={{
+                                        backgroundColor: darkMode ? '#1E1E1E' : '#fff',
+                                        border: 'none',
+                                        borderRadius: '12px',
+                                        fontWeight: 'bold',
+                                        fontSize: '12px',
+                                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                                    }}
+                                    formatter={(value: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)}
+                                />
+                                <Legend
+                                    verticalAlign="bottom"
+                                    align="center"
+                                    iconType="circle"
+                                    layout="horizontal"
+                                    formatter={(value, entry: any) => {
+                                        const payload = entry.payload;
+                                        const percent = total > 0 ? ((payload.value / total) * 100).toFixed(0) : 0;
+                                        return (
+                                            <span className="text-[9px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-tighter">
+                                                {value}: <span className="text-gray-900 dark:text-white">{formatCurrency(payload.value)}</span> ({percent}%)
+                                            </span>
+                                        );
+                                    }}
+                                />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    ) : (
+                        <div className="h-full flex items-center justify-center text-gray-400 text-xs italic">Sem dados suficientes</div>
+                    )}
+                </div>
+            </Card>
+        );
+    };
 
     return (
         <div className="space-y-6">
