@@ -148,10 +148,10 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ transactions =
         return (
             <Card className="p-6 bg-white dark:bg-[#1E1E1E] border-none shadow-sm flex flex-col items-center">
                 <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-6 text-center">{title}</h3>
-                <div className="h-[280px] w-full">
+                <div className="h-[280px] w-full" style={{ pointerEvents: 'none', outline: 'none' }}>
                     {data.length > 0 ? (
                         <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
+                            <PieChart style={{ outline: 'none' }}>
                                 <Pie
                                     data={data}
                                     innerRadius={60}
@@ -160,9 +160,9 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ transactions =
                                     dataKey="value"
                                     isAnimationActive={true}
                                     stroke="none"
-                                    // Disable expanding segment on click/hover
-                                    activeShape={undefined}
+                                    activeShape={false}
                                     activeIndex={-1}
+                                    focusable={false}
                                 >
                                     {data.map((entry, index) => (
                                         <Cell
@@ -212,9 +212,9 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ transactions =
         <div className="space-y-6">
             <Card className="p-6 bg-white dark:bg-[#1E1E1E] border-none shadow-sm">
                 <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-6">Fluxo de Caixa (Últimos 7 dias)</h3>
-                <div className="h-[300px]" style={{ outline: 'none' }}>
+                <div className="h-[300px]" style={{ pointerEvents: 'none', outline: 'none' }}>
                     <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={chartData} style={{ outline: 'none' }}>
+                        <AreaChart data={chartData} style={{ outline: 'none' }} focusable={false}>
                             <defs>
                                 <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
                                     <stop offset="5%" stopColor={BRAND_COLORS.primary} stopOpacity={0.1} />
