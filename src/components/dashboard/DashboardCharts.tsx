@@ -212,9 +212,9 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ transactions =
         <div className="space-y-6">
             <Card className="p-6 bg-white dark:bg-[#1E1E1E] border-none shadow-sm">
                 <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-6">Fluxo de Caixa (Últimos 7 dias)</h3>
-                <div className="h-[300px]">
+                <div className="h-[300px]" style={{ outline: 'none' }}>
                     <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={chartData}>
+                        <AreaChart data={chartData} style={{ outline: 'none' }}>
                             <defs>
                                 <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
                                     <stop offset="5%" stopColor={BRAND_COLORS.primary} stopOpacity={0.1} />
